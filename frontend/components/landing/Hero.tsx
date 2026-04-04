@@ -20,10 +20,10 @@ export function Hero() {
 
             {/* Text Overlay 1 */}
             <div
-                className="absolute text-center z-10 pointer-events-none mix-blend-normal font-sans tracking-tighter text-yellow-500"
+                className="absolute text-center z-10 pointer-events-none font-sans tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-600 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]"
                 style={{
                     left: '52.5%',
-                    top: '38.5%',
+                    top: '48.5%',
                     width: 'auto',
                     whiteSpace: 'nowrap',
                     transform: 'translate(-50%, -50%)',
@@ -31,15 +31,15 @@ export function Hero() {
                     lineHeight: '87px',
                 }}
             >
-                Build. Break. Deploy
+                See Papers Differently,
             </div>
 
             {/* Text Overlay 2 */}
             <div
-                className="absolute text-center z-10 pointer-events-none mix-blend-normal font-sans font-medium text-yellow-500"
+                className="absolute text-center z-10 pointer-events-none font-sans font-medium bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-600 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]"
                 style={{
                     left: '57.8%',
-                    top: '47%',
+                    top: '58%',
                     width: 'auto',
                     whiteSpace: 'nowrap',
                     transform: 'translate(-50%, -50%)',
@@ -48,7 +48,7 @@ export function Hero() {
                     letterSpacing: '0px',
                 }}
             >
-                effortlessly on Stellar
+                With PaperLens
             </div>
         </>
     );

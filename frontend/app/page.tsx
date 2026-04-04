@@ -19,7 +19,6 @@ export default function LandingPage() {
         <Navbar />
         <div className="relative z-10 flex flex-col items-center w-full min-h-screen px-6 pt-[10vh] pb-20 overflow-hidden">
           <Hero />
-          <IntentBox />
         </div>
         <Logos />
         {/* <ScrollRevealGallery /> */}

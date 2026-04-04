@@ -69,6 +69,7 @@
     "lucide-react": "^1.7.0",
     "monaco-editor": "^0.53.0",
     "monaco-themes": "^0.4.8",
+    "motion": "^12.38.0",
     "next": "^16.2.2",
     "next-themes": "^0.4.6",
     "openai": "^6.22.0",
