@@ -113,7 +113,7 @@ export function HowItWorks() {
         {/* Title stays fixed while cards scroll */}
         <div className="w-full px-6 z-10 flex justify-center shrink-0">
           <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black uppercase text-center">
-            How It Works
+            Features
           </h2>
         </div>
 
