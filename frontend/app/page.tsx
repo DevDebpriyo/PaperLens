@@ -17,8 +17,8 @@ export default function LandingPage() {
     <ReactLenis root>
       <main className="flex flex-col w-full min-h-screen bg-[#fbe1b1] text-[#354230]">
         <Navbar />
-        {/* Sticky hero + marquee block — About slides over on scroll */}
-        <div className="sticky top-0 z-10">
+        {/* Intro block in normal flow so following sections (including footer) render correctly */}
+        <div className="relative z-10">
           <div className="relative flex flex-col items-center w-full min-h-screen px-6 pt-[10vh] pb-20 overflow-hidden">
             <Hero />
           </div>

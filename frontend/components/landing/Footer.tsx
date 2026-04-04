@@ -57,7 +57,7 @@ const Footer = () => {
     };
 
     return (
-        <div className="bg-white">
+        <div className="bg-[#FFD280]">
             <div className='h-[500px] grid place-content-center'>
                 <ScrollBaseAnimation
                     delay={500}
