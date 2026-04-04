@@ -345,7 +345,7 @@ export function About() {
                     "md:text-9xl",
                     "lg:text-[10rem]",
                     "tracking-widest",
-                    i % 2 === 0 ? "text-amber-400" : "text-white",
+                    "text-amber-400",
                   ]
                     .filter(Boolean)
                     .join(" ")
