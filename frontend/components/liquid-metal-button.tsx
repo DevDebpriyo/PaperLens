@@ -9,9 +9,10 @@ interface LiquidMetalButtonProps {
   onClick?: () => void
   viewMode?: "text" | "icon"
   width?: number
+  variant?: "dark" | "white"
 }
 
-export function LiquidMetalButton({ label = "Generate", onClick, viewMode = "text", width }: LiquidMetalButtonProps) {
+export function LiquidMetalButton({ label = "Generate", onClick, viewMode = "text", width, variant = "dark" }: LiquidMetalButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isPressed, setIsPressed] = useState(false)
   const [ripples, setRipples] = useState<Array<{ x: number; y: number; id: number }>>([])
@@ -206,9 +207,11 @@ export function LiquidMetalButton({ label = "Generate", onClick, viewMode = "tex
               <span
                 style={{
                   fontSize: "14px",
-                  color: "#ffffff",
+                  color: variant === "white" ? "#111111" : "#ffffff",
                   fontWeight: 600,
-                  textShadow: "0px 2px 8px rgba(255, 255, 255, 0.06)",
+                  textShadow: variant === "white"
+                    ? "0px 2px 8px rgba(0, 0, 0, 0.08)"
+                    : "0px 2px 8px rgba(255, 255, 255, 0.06)",
                   transition: "all 0.4s ease",
                   transform: "scale(1)",
                   whiteSpace: "nowrap",
@@ -242,9 +245,13 @@ export function LiquidMetalButton({ label = "Generate", onClick, viewMode = "tex
                 height: `${dimensions.innerHeight}px`,
                 margin: "2px",
                 borderRadius: "100px",
-                background: "linear-gradient(180deg, #202020 0%, #000000 100%)",
+                background: variant === "white"
+                  ? "linear-gradient(180deg, #ffffff 0%, #e8e8e8 100%)"
+                  : "linear-gradient(180deg, #202020 0%, #000000 100%)",
                 boxShadow: isPressed
-                  ? "inset 0px 2px 4px rgba(0, 0, 0, 0.4), inset 0px 1px 2px rgba(0, 0, 0, 0.3)"
+                  ? variant === "white"
+                    ? "inset 0px 2px 4px rgba(0, 0, 0, 0.15), inset 0px 1px 2px rgba(0, 0, 0, 0.1)"
+                    : "inset 0px 2px 4px rgba(0, 0, 0, 0.4), inset 0px 1px 2px rgba(0, 0, 0, 0.3)"
                   : "none",
                 transition:
                   "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.4s ease, height 0.4s ease, box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1)",

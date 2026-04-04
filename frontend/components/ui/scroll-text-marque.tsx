@@ -71,7 +71,7 @@ export default function ScrollBaseAnimation({
      * screen size, but for simplicity we repeat it 4 times. 
      */
     return (
-        <div className="overflow-hidden whitespace-nowrap flex flex-nowrap">
+        <div className="relative overflow-hidden whitespace-nowrap flex flex-nowrap">
             <motion.div
                 className={cn("flex flex-nowrap text-nowrap gap-4", clasname)} // Applying clasname here
                 style={{ x }}
