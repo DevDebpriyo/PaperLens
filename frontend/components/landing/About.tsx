@@ -7,7 +7,7 @@ import { MoveRight, Check, Terminal, Globe } from "lucide-react";
 gsap.registerPlugin(ScrollTrigger);
 
 const description =
-  "PaperLens is a revolutionary platform designed to bridge the gap between human intent and production-ready smart contracts. We make building on Stellar Soroban as easy as typing a sentence, accelerating the transition to a decentralized future.";
+  "PaperLens is a revolutionary platform designed to bridge the gap between human intent and complex research, transforming static papers into immersive, easy-to-digest experiences. Making knowledge accessible, intuitive, and engaging.";
 
 // ─── How It Works mockups (inlined so they render inside the pinned section) ───
 const Step1Mockup = () => (
@@ -361,8 +361,8 @@ export function About() {
         style={{ opacity: 0 }}
       >
         {/* Title */}
-        <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black uppercase text-center mb-12 md:mb-16">
-          How It Works
+        <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black uppercase text-center mt-[15px] mb-12 md:mb-16">
+          Features
         </h2>
 
         {/* Steps grid */}
