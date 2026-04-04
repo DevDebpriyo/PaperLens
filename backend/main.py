@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from routes.health import router as health_router
 
-app = FastAPI(title="Hacktropica API")
+app = FastAPI(title="Backend API")
 
 app.include_router(health_router)
 
