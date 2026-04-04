@@ -28,7 +28,9 @@ export default function LandingPage() {
         <About />
 
         <PaperLensBentoGrid />
-        <FAQ />
+        <div className="opacity-0">
+          <FAQ />
+        </div>
         <Footer />
       </main>
     </ReactLenis>

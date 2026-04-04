@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MoveRight, Check, Terminal, Globe } from "lucide-react";
+import { MoveRight, Mic, MessageCircle, Sparkles } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,16 +12,22 @@ const description =
 // ─── How It Works mockups (inlined so they render inside the pinned section) ───
 const Step1Mockup = () => (
   <div className="w-full h-full p-4 flex flex-col gap-3">
-    <div className="text-xs text-black/60 mb-1">Prompt</div>
-    <div className="bg-white border-2 border-black rounded-lg p-3 h-24 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <div className="text-xs text-black/60 mb-1">Adaptive Story</div>
+    <div className="bg-white border-2 border-black rounded-lg p-3 h-28 relative overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
       <div className="flex gap-2 items-center mb-2">
         <div className="w-2 h-2 rounded-full bg-red-400" />
         <div className="w-2 h-2 rounded-full bg-yellow-400" />
         <div className="w-2 h-2 rounded-full bg-[#FFA500]" />
       </div>
-      <p className="text-xs text-[#1A1A1A] font-mono font-medium">
-        Build a Soroban staking contract with rewards...
-      </p>
+      <div className="space-y-1 text-[10px] leading-tight text-[#1A1A1A] font-mono font-medium pr-8">
+        <p className="truncate">Doc: reinforcement-learning-survey.pdf</p>
+        <div className="flex gap-1">
+          <span className="px-1.5 py-0.5 rounded bg-[#FFA500] text-white">Beginner</span>
+          <span className="px-1.5 py-0.5 rounded bg-black/10">Interm.</span>
+          <span className="px-1.5 py-0.5 rounded bg-black/10">Advanced</span>
+        </div>
+        <p className="truncate text-black/70">Narrative: Agent learns by trial and error...</p>
+      </div>
       <div className="absolute bottom-2 right-2">
         <div className="bg-[#354230]/10 p-1.5 rounded-md">
           <MoveRight className="w-3 h-3 text-[#1A1A1A]" />
@@ -35,47 +41,53 @@ const Step2Mockup = () => (
   <div className="w-full h-full p-4 flex flex-col gap-2">
     <div className="flex items-center justify-between border-b border-black/5 pb-2">
       <div className="flex items-center gap-2 text-xs text-neutral-600">
-        <Terminal className="w-3 h-3 text-neutral-500" />
-        <span>contract.rs</span>
+        <Mic className="w-3 h-3 text-neutral-500" />
+        <span>podcast-session.wav</span>
       </div>
       <div className="flex gap-1">
         <div className="w-1.5 h-1.5 rounded-full bg-black/10" />
         <div className="w-1.5 h-1.5 rounded-full bg-black/10" />
       </div>
     </div>
-    <div className="space-y-1.5 font-mono text-[10px] text-neutral-600">
-      <div className="flex gap-2">
-        <span className="text-purple-700 font-bold">pub fn</span>
-        <span className="text-yellow-700 font-bold">init</span>(e: Env) {"{"}
+    <div className="space-y-2 font-mono text-[10px] text-neutral-600">
+      <p><span className="text-[#FFA500] font-bold">Host:</span> Today we unpack diffusion models.</p>
+      <p><span className="text-[#D98E28] font-bold">Guest:</span> Let's simplify the denoising steps.</p>
+      <p><span className="text-[#FFA500] font-bold">Host:</span> Great. Keep it concise and practical.</p>
+      <div className="pt-1 flex gap-1">
+        <div className="h-2 w-1 rounded-full bg-[#FFA500]/80" />
+        <div className="h-3 w-1 rounded-full bg-[#FFA500]" />
+        <div className="h-4 w-1 rounded-full bg-[#D98E28]" />
+        <div className="h-2 w-1 rounded-full bg-[#FFA500]/70" />
+        <div className="h-3 w-1 rounded-full bg-[#FFA500]/90" />
       </div>
-      <div className="pl-4 text-neutral-400 italic">{"// Initializing..."}</div>
-      <div className="pl-4 flex gap-2">
-        <span className="text-blue-700">let</span>
-        <span className="text-black font-medium">token</span> = ...
-      </div>
-      <div className="pl-4 text-[#FFA500] font-medium">Ok(token)</div>
-      <div>{"}"}</div>
+      <p className="text-[9px] text-black/50">Format: Simulated Host + Guest</p>
     </div>
   </div>
 );
 
 const Step3Mockup = () => (
-  <div className="w-full h-full p-4 flex flex-col justify-center gap-3">
-    <div className="bg-white border-2 border-black rounded-lg p-3 flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-      <div className="bg-[#FFA500] p-1.5 rounded-full">
-        <Check className="w-3 h-3 text-white" />
-      </div>
-      <div>
-        <div className="text-xs font-bold text-[#FFA500]">Deployment Success</div>
-        <div className="text-[10px] text-[#FFA500]/70">Network: Futurenet</div>
-      </div>
+  <div className="w-full h-full p-4 flex flex-col justify-center gap-2">
+    <div className="bg-white border-2 border-black rounded-lg p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+      <div className="text-[10px] text-neutral-500 mb-1">Question</div>
+      <p className="text-xs font-semibold text-[#1A1A1A]">How does PPO stabilize policy updates?</p>
     </div>
-    <div className="flex items-center justify-between px-1">
-      <div className="flex items-center gap-2 text-xs text-neutral-500">
-        <Globe className="w-3 h-3" />
-        <span>Explorer Link</span>
+
+    <div className="bg-[#FFF7E8] border-2 border-black/20 rounded-lg p-3">
+      <div className="flex items-center gap-2 mb-1">
+        <Sparkles className="w-3 h-3 text-[#FFA500]" />
+        <span className="text-[10px] font-bold text-[#D98E28]">PaperLens Answer</span>
       </div>
-      <div className="text-[10px] text-blue-600 underline font-medium">View hash</div>
+      <p className="text-[10px] text-neutral-700 leading-relaxed">
+        PPO clips policy ratios, limiting unstable jumps and preserving reliable training progress.
+      </p>
+    </div>
+
+    <div className="flex items-center justify-between px-1 text-[10px] text-neutral-500">
+      <div className="flex items-center gap-1">
+        <MessageCircle className="w-3 h-3" />
+        <span>Paper-only scope: on</span>
+      </div>
+      <span>Off-topic blocked</span>
     </div>
   </div>
 );
@@ -83,23 +95,23 @@ const Step3Mockup = () => (
 const steps = [
   {
     Mockup: Step1Mockup,
-    title: "Describe Your Intent",
+    title: "Story Mode",
     description:
-      "Tell PaperLens what you want to build. From simple tokens to complex DeFi protocols.",
+      "Translates uploaded documents into narratives tailored to Beginner, Intermediate, or Advanced comprehension levels.",
     step: "STEP 1",
   },
   {
     Mockup: Step2Mockup,
-    title: "AI Generates Code",
+    title: "Podcast Mode",
     description:
-      "Our agent writes production-ready Soroban contracts and frontend bindings in seconds.",
+      "Converts research into an audio-style discussion featuring a simulated Host and Guest for engaging learning.",
     step: "STEP 2",
   },
   {
     Mockup: Step3Mockup,
-    title: "Deploy to Stellar",
+    title: "Q&A Mode",
     description:
-      "One-click deployment to Testnet or Mainnet with automated verification checks.",
+      "Provides context-aware Q&A that answers strictly from the uploaded paper and prevents irrelevant tangents.",
     step: "STEP 3",
   },
 ];

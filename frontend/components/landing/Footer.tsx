@@ -64,7 +64,7 @@ const Footer = () => {
                     baseVelocity={-3}
                     clasname='font-bold tracking-[-0.07em] leading-[90%] text-[#87e64b] text-10xl md:text-8xl'
                 >
-                    Follow us on X!
+                    Stay ahead of the curve!
                 </ScrollBaseAnimation>
                 <ScrollBaseAnimation
                     delay={500}
