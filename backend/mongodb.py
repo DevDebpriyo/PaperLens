@@ -5,7 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
 
-MONGO_URI = os.getenv('RAID_DATA_MONGO_URI')
+MONGO_URI = os.getenv('MONGO_URI')
 try:
     raid_client = AsyncIOMotorClient(
         MONGO_URI, 
