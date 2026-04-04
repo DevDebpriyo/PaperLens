@@ -28,8 +28,6 @@ export function Hero() {
                 <source src="/video.mp4" type="video/mp4" />
             </video>
 
-            {/* Gradient overlay to blend video with page background */}
-            <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#fbe1b1] via-[#fbe1b1]/60 to-transparent z-0 pointer-events-none" />
 
             {/* Text Overlay 1 */}
             <div

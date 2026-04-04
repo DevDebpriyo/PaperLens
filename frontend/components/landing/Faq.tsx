@@ -41,10 +41,10 @@ const FAQRow = ({
     onClick: () => void;
 }) => {
     return (
-        <div className="border-t-2 border-black last:border-b-2">
+        <div className="border-t-2 border-black/40 last:border-b-2">
             <button
                 onClick={onClick}
-                className="w-full flex items-center justify-between py-10 text-left group hover:bg-black/5 transition-colors px-2"
+                className="w-full flex items-center justify-between py-10 text-left group hover:bg-black/10 transition-colors px-2"
             >
                 <span className="text-black text-xl md:text-2xl font-bold tracking-tight transition-colors">
                     {item.question}
@@ -79,7 +79,7 @@ export default function FAQ() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
     return (
-        <section className="text-white px-6 py-40 border-t border-white/5">
+        <section className="bg-amber-400 text-black px-6 py-40 border-t-2 border-black/10">
             <div className="max-w-[90rem] mx-auto">
                 {/* Title */}
                 <h2 className="text-6xl md:text-7xl font-bold mb-24 tracking-tighter text-black uppercase text-center">
