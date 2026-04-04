@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { LiquidMetalButton } from "@/components/liquid-metal-button";
-import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
 export function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -19,10 +19,6 @@ export function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    const renderLabel = () => {
-        return "Explore PaperLens";
-    };
-
     return (
         <nav className="fixed z-50 w-full px-2 pt-7 top-0 left-0 right-0">
             <div
@@ -35,46 +31,74 @@ export function Navbar() {
             >
                 <div className="relative flex items-center justify-between py-3 lg:py-4">
                     {/* Logo Section */}
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link href="/" className="flex items-center">
                         <Image
-                            src="/logo.webp"
-                            alt="PaperLens Logo"
-                            width={32}
-                            height={32}
-                            className="h-8 w-8 object-contain"
-                            onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                            }}
+                            src="/navbar.png"
+                            alt="PaperLens"
+                            width={200}
+                            height={52}
+                            className="h-12 w-auto object-contain ml-2.5"
+                            priority
                         />
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent relative">
-                            <span className="relative inline-block bg-linear-to-r from-white/90 via-primary/80 to-white/70 bg-clip-text text-transparent">
-                                PaperLens
-                                <span className="absolute -inset-1 bg-linear-to-r from-white/60 via-transparent to-white/40 opacity-30 blur-xl pointer-events-none animate-pulse" aria-hidden="true" />
-                            </span>
-                        </h1>
                     </Link>
 
-                    {/* Desktop Navigation - Connect Wallet / Profile */}
+                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-3">
-                        <Show when="signed-out">
-                            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                <div>
-                                    <LiquidMetalButton
-                                        label={renderLabel()}
-                                        onClick={() => {}}
-                                        width={190}
-                                    />
-                                </div>
-                            </SignInButton>
-                        </Show>
+                        {/* Always show UserButton when signed in */}
                         <Show when="signed-in">
-                            <UserButton 
+                            <UserButton
                                 appearance={{
                                     elements: {
-                                        userButtonAvatarBox: "w-10 h-10 ring-2 ring-white/20"
-                                    }
+                                        userButtonAvatarBox: "w-10 h-10 ring-2 ring-white/20",
+                                    },
                                 }}
                             />
+                        </Show>
+
+                        {/* Signed-out: initial = Login + Signup, scrolled = Explore PaperLens */}
+                        <Show when="signed-out">
+                            <div
+                                className={cn(
+                                    "flex items-center gap-3 transition-all duration-500",
+                                    scrolled ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"
+                                )}
+                            >
+                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                    <div id="navbar-login-btn">
+                                        <LiquidMetalButton
+                                            label="Login"
+                                            onClick={() => {}}
+                                            width={120}
+                                        />
+                                    </div>
+                                </SignInButton>
+                                <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                                    <div id="navbar-signup-btn">
+                                        <LiquidMetalButton
+                                            label="Sign Up"
+                                            onClick={() => {}}
+                                            width={120}
+                                            variant="white"
+                                        />
+                                    </div>
+                                </SignUpButton>
+                            </div>
+                            <div
+                                className={cn(
+                                    "transition-all duration-500",
+                                    scrolled ? "opacity-100" : "opacity-0 pointer-events-none w-0 overflow-hidden"
+                                )}
+                            >
+                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                    <div>
+                                        <LiquidMetalButton
+                                            label="Getting Started"
+                                            onClick={() => {}}
+                                            width={190}
+                                        />
+                                    </div>
+                                </SignInButton>
+                            </div>
                         </Show>
                     </div>
 
@@ -102,26 +126,48 @@ export function Navbar() {
                         className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm top-18"
                         onClick={() => setMobileMenuOpen(false)}
                     />
-                    <div className="md:hidden fixed top-18 left-2 right-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl p-4 space-y-2 z-50 ring-1 ring-white/10 flex justify-center">
+                    <div className="md:hidden fixed top-18 left-2 right-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl p-4 space-y-3 z-50 ring-1 ring-white/10 flex flex-col items-center">
                         <Show when="signed-out">
-                            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                <div>
-                                    <LiquidMetalButton
-                                        label={renderLabel()}
-                                        onClick={() => {
-                                            setMobileMenuOpen(false);
-                                        }}
-                                        width={280}
-                                    />
+                            {scrolled ? (
+                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                    <div>
+                                        <LiquidMetalButton
+                                            label="Getting Started"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            width={280}
+                                        />
+                                    </div>
+                                </SignInButton>
+                            ) : (
+                                <div className="flex flex-col items-center gap-3 w-full">
+                                    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                        <div id="mobile-login-btn" onClick={() => setMobileMenuOpen(false)}>
+                                            <LiquidMetalButton
+                                                label="Login"
+                                                onClick={() => {}}
+                                                width={280}
+                                            />
+                                        </div>
+                                    </SignInButton>
+                                    <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                                        <div id="mobile-signup-btn" onClick={() => setMobileMenuOpen(false)}>
+                                            <LiquidMetalButton
+                                                label="Sign Up"
+                                                onClick={() => {}}
+                                                width={280}
+                                                variant="white"
+                                            />
+                                        </div>
+                                    </SignUpButton>
                                 </div>
-                            </SignInButton>
+                            )}
                         </Show>
                         <Show when="signed-in">
-                            <UserButton 
+                            <UserButton
                                 appearance={{
                                     elements: {
-                                        userButtonAvatarBox: "w-16 h-16 ring-2 ring-white/20"
-                                    }
+                                        userButtonAvatarBox: "w-16 h-16 ring-2 ring-white/20",
+                                    },
                                 }}
                             />
                         </Show>

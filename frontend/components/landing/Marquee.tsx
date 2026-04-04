@@ -3,12 +3,12 @@ import Image from "next/image"
 
 const companies = [
     {
-        name: "Stellar",
-        url: "/stellar.png",
+        name: "ElevenLabs",
+        url: "/elevenlabs.png",
     },
     {
-        name: "RiseIn",
-        url: "/risein.png",
+        name: "Gemini",
+        url: "/gemini.png",
     },
     {
         name: "Github",
@@ -27,14 +27,17 @@ export function Logos() {
                 {companies.map((company, idx) => (
                     <div
                         key={idx}
-                        className="flex items-center justify-center mx-16 h-24 w-60"
+                        className="flex items-center justify-center mx-16"
+                        style={{ height: "96px", width: "240px" }}
                     >
                         <Image
-                            width={240}
-                            height={100}
                             src={company.url || "/placeholder.svg"}
-                            className="object-contain h-full w-full brightness-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
                             alt={company.name}
+                            width={240}
+                            height={96}
+                            className="object-contain brightness-0 opacity-80 hover:opacity-100 transition-opacity duration-300"
+                            style={{ height: "96px", width: "auto", maxWidth: "240px" }}
+                            priority={idx < 2}
                         />
                     </div>
                 ))}
