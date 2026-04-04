@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/landing/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { IntentBox } from "@/components/landing/IntentBox";
-import { HowItWorks } from "@/components/landing/HowItWorks";
+
 import { Logos } from "@/components/landing/Marquee";
 import PaperLensBentoGrid from "@/components/landing/BentoGrid";
 import FAQ from "@/components/landing/Faq";
@@ -17,13 +17,16 @@ export default function LandingPage() {
     <ReactLenis root>
       <main className="flex flex-col w-full min-h-screen bg-[#fbe1b1] text-[#354230]">
         <Navbar />
-        <div className="relative z-10 flex flex-col items-center w-full min-h-screen px-6 pt-[10vh] pb-20 overflow-hidden">
-          <Hero />
+        {/* Intro block in normal flow so following sections (including footer) render correctly */}
+        <div className="relative z-10">
+          <div className="relative flex flex-col items-center w-full min-h-screen px-6 pt-[10vh] pb-20 overflow-hidden">
+            <Hero />
+          </div>
+          <Logos />
         </div>
-        <Logos />
         {/* <ScrollRevealGallery /> */}
         <About />
-        <HowItWorks />
+
         <PaperLensBentoGrid />
         <FAQ />
         <Footer />
