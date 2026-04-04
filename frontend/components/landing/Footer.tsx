@@ -57,7 +57,7 @@ const Footer = () => {
     };
 
     return (
-        <div className="bg-[#FFD280]">
+        <div className="bg-[#FBE2B3]">
             <div className='h-[500px] grid place-content-center'>
                 <ScrollBaseAnimation
                     delay={500}
@@ -172,7 +172,7 @@ const Footer = () => {
                                 </li>
                                 <li className='text-xl font-medium'>
                                     <a
-                                        href='https://github.com/DevDebpriyo'
+                                        href='https://github.com/ArghyadeepS'
                                         target='_blank'
                                         className='underline'
                                     >
@@ -181,7 +181,7 @@ const Footer = () => {
                                 </li>
                                 <li className='text-xl font-medium'>
                                     <a
-                                        href='https://x.com/Deb_isadev'
+                                        href='https://x.com/arghyadeep48284'
                                         target='_blank'
                                         className='underline'
                                     >
