@@ -6,7 +6,7 @@ from groq import Groq
 load_dotenv()
 
 def get_groq_client():
-    with open(os.path.join(os.path.dirname(__file__), '../backend/data/tokens.json'), "r") as f:
+    with open("data/tokens.json", "r") as f:
         keys = list(json.load(f).values())
     last_exception = None
     for key in keys:
@@ -25,7 +25,7 @@ REJECTION_MSG = "I am PaperLens AI. I only assist with research paper understand
 
 def load_system_prompt():
     try:
-        with open("data/prompt.txt", "r", encoding="utf-8") as f:
+        with open("../data/chatbot.txt", "r", encoding="utf-8") as f:
             return f.read()
     except Exception:
         return "You are PaperLens AI."

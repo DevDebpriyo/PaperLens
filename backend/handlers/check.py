@@ -23,7 +23,7 @@ semaphore = asyncio.Semaphore(5)
 client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Read prompt
-with open("prompt.txt", "r", encoding="utf-8") as f:
+with open("../data/pdf.txt", "r", encoding="utf-8") as f:
     BASE_PROMPT = f.read()
 
 
