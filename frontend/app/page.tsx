@@ -27,7 +27,7 @@ export default function LandingPage() {
 
         {/* Explicit scroll space so GSAP's pinSpacing has room to work.
             Without content below, the page ends too early for the animation. */}
-        <div style={{ height: "200vh" }} aria-hidden="true" />
+        <div style={{ height: "500vh" }} aria-hidden="true" />
 
         {/* These sections sit at z-10, above the sticky About (z-0),
             so they naturally scroll over the white background */}

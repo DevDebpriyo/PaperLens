@@ -117,11 +117,11 @@ const steps = [
 ];
 
 export function About() {
-  const sectionRef    = useRef<HTMLDivElement>(null);
-  const paraRef       = useRef<HTMLDivElement>(null);
-  const plRef         = useRef<HTMLDivElement>(null);
-  const leftDoorRef   = useRef<HTMLDivElement>(null);
-  const rightDoorRef  = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const paraRef = useRef<HTMLDivElement>(null);
+  const plRef = useRef<HTMLDivElement>(null);
+  const leftDoorRef = useRef<HTMLDivElement>(null);
+  const rightDoorRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -136,12 +136,12 @@ export function About() {
       return;
 
     const ctx = gsap.context(() => {
-      const charEls  = paraRef.current!.querySelectorAll<HTMLElement>(".char");
+      const charEls = paraRef.current!.querySelectorAll<HTMLElement>(".char");
       const paperEls = plRef.current!.querySelectorAll<HTMLElement>(".paper-char");
 
       // Doors start fully off-screen
-      gsap.set(leftDoorRef.current,  { xPercent: -100 });
-      gsap.set(rightDoorRef.current, { xPercent:  100 });
+      gsap.set(leftDoorRef.current, { xPercent: -100 });
+      gsap.set(rightDoorRef.current, { xPercent: 100 });
 
       // How It Works starts invisible
       gsap.set(howItWorksRef.current, { opacity: 0, y: 40 });
@@ -162,10 +162,10 @@ export function About() {
             sectionRef.current.style.zIndex = "0";
           },
           onEnterBack: () => {
-            // User scrolled back into the animation zone — reset for re-play
+            // GSAP has already re-pinned (position:fixed) before this fires.
+            // Do NOT clear position/top — that would remove GSAP's pin.
+            // Only reset zIndex so the section layers correctly during replay.
             if (!sectionRef.current) return;
-            sectionRef.current.style.position = "";
-            sectionRef.current.style.top = "";
             sectionRef.current.style.zIndex = "20";
           },
         },
