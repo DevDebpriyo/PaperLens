@@ -544,23 +544,40 @@ export default function ChatPage() {
     null,
   );
 
-  const chatEndpoint = useMemo(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
-    if (!baseUrl) return "";
-    return `${baseUrl.replace(/\/+$/, "")}/chat`;
+  const backendBaseUrl = useMemo(() => {
+    const configuredBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
+    if (!configuredBaseUrl) return "";
+
+    try {
+      const parsedUrl = new URL(configuredBaseUrl);
+      const isHttpsPage =
+        typeof window !== "undefined" && window.location.protocol === "https:";
+
+      // Prevent mixed-content blocking on deployed HTTPS frontends.
+      if (isHttpsPage && parsedUrl.protocol === "http:") {
+        parsedUrl.protocol = "https:";
+      }
+
+      return parsedUrl.toString().replace(/\/+$/, "");
+    } catch {
+      return configuredBaseUrl.replace(/\/+$/, "");
+    }
   }, []);
+
+  const chatEndpoint = useMemo(() => {
+    if (!backendBaseUrl) return "";
+    return `${backendBaseUrl}/chat`;
+  }, [backendBaseUrl]);
 
   const storyVoiceEndpoint = useMemo(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
-    if (!baseUrl) return "";
-    return `${baseUrl.replace(/\/+$/, "")}/story/voice`;
-  }, []);
+    if (!backendBaseUrl) return "";
+    return `${backendBaseUrl}/story/voice`;
+  }, [backendBaseUrl]);
 
   const podcastVoiceEndpoint = useMemo(() => {
-    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
-    if (!baseUrl) return "";
-    return `${baseUrl.replace(/\/+$/, "")}/podcast/voice`;
-  }, []);
+    if (!backendBaseUrl) return "";
+    return `${backendBaseUrl}/podcast/voice`;
+  }, [backendBaseUrl]);
 
   const isStoryOrPodcastMode = selectedMode !== "platinum";
   const hasUploadedFiles = uploadedFiles.length > 0;
