@@ -1,7 +1,7 @@
 import subprocess
 import ujson as json
 
-bot_files = ["backend/host.py","backend/mongodb.py","backend/postgres.py"]
+bot_files = ["host.py","mongodb.py","postgres.py"]
 
 processes = []
 
