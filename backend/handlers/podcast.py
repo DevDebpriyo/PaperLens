@@ -65,6 +65,7 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
     dialogue = []
     total_chars = 0
     voice_ids = list(VOICE_IDS_PAIR.get(level, VOICE_IDS_PAIR["friend"]))
+    host_name, guest_name = SPEAKER_NAMES.get(level, SPEAKER_NAMES["friend"])
     for i in range(turns):
         chat1 = client.chat.completions.create(
             messages=messages,
@@ -76,12 +77,22 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
         msg1 = "\n".join(msg1_lines[:3])
         if total_chars + len(msg1) > max_chars:
             msg1 = msg1[:max_chars - total_chars]
-        total_chars += len(msg1)
-        dialogue.append({"voiceid": voice_ids[0], "text": msg1})
-        messages.append({"role": "assistant", "content": msg1})
-        if total_chars >= max_chars:
-            break
-        # Speaker 2
+        # Only append non-blank responses
+        if msg1.strip():
+            total_chars += len(msg1)
+            msg1_lower = msg1.lower()
+            if host_name.split()[0].lower() in msg1_lower:
+                dialogue.append({"voiceid": voice_ids[0], "text": msg1})
+            elif guest_name.split()[0].lower() in msg1_lower:
+                dialogue.append({"voiceid": voice_ids[1], "text": msg1})
+            else:
+                dialogue.append({"voiceid": voice_ids[0], "text": msg1})
+            messages.append({"role": "assistant", "content": msg1})
+            if total_chars >= max_chars:
+                break
+        else:
+            # Still add to messages for context, but don't append to dialogue
+            messages.append({"role": "assistant", "content": msg1})
         if i < turns - 1:
             guest_messages = messages.copy()
             guest_messages[0] = {"role": "system", "content": system_guest}
@@ -95,11 +106,20 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
             msg2 = "\n".join(msg2_lines[:3])
             if total_chars + len(msg2) > max_chars:
                 msg2 = msg2[:max_chars - total_chars]
-            total_chars += len(msg2)
-            dialogue.append({"voiceid": voice_ids[1], "text": msg2})
-            messages.append({"role": "assistant", "content": msg2})
-            if total_chars >= max_chars:
-                break
+            if msg2.strip():
+                total_chars += len(msg2)
+                msg2_lower = msg2.lower()
+                if guest_name.split()[0].lower() in msg2_lower:
+                    dialogue.append({"voiceid": voice_ids[1], "text": msg2})
+                elif host_name.split()[0].lower() in msg2_lower:
+                    dialogue.append({"voiceid": voice_ids[0], "text": msg2})
+                else:
+                    dialogue.append({"voiceid": voice_ids[1], "text": msg2})
+                messages.append({"role": "assistant", "content": msg2})
+                if total_chars >= max_chars:
+                    break
+            else:
+                messages.append({"role": "assistant", "content": msg2})
     if dialogue:
         print(dialogue)
         return dialogue

@@ -59,8 +59,8 @@ def generate_story_from_text(extracted_text: str, level: str = "beginner") -> st
         return f"Error generating story: {str(e)}"
 
 VOICE_IDS = {
-    "beginner": "QIhD5ivPGEoYZQDocuHI",      
-    "intermediate": "DWRB4weeqtqHSoQLvPTd", 
+    "beginner": "jpVgjXUZdWtGxM370mm3",      
+    "intermediate": "aTNruPLxuxdPRPemSfKU", 
     "advanced": "ITaiTttRyfzFt2lW5dI5"       
 }
 
