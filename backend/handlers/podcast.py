@@ -56,39 +56,39 @@ SYSTEMS = {
 def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 5000, level: str = "friend") -> dict:
     speakers = SPEAKER_NAMES.get(level, SPEAKER_NAMES["friend"])
     systems = SYSTEMS.get(level, SYSTEMS["friend"])
+    discussion_instruction = (
+        "The podcast must be a normal discussion about the topic, not related to YouTube videos, uploads, or any video content. "
+        "The host's responses should make up approximately 40% of the total conversation length, and the guest's responses should make up approximately 60%. "
+        "The total conversation must not exceed 8000 characters."
+    )
     messages = [
-        {"role": "system", "content": systems[0]},
+        {"role": "system", "content": systems[0] + " " + discussion_instruction},
         {"role": "user", "content": f"Let's discuss this research paper: {paper_text[:8000]}"}
     ]
     dialogue = []
     total_chars = 0
+    max_chars = 8000
     for i in range(turns):
-        # Speaker 1
         chat1 = client.chat.completions.create(
             messages=messages,
             model="llama-3.1-8b-instant",
             temperature=0.7
         )
         msg1 = chat1.choices[0].message.content.strip()
-        if total_chars + len(msg1) > max_chars:
-            msg1 = msg1[:max_chars - total_chars]
         total_chars += len(msg1)
         dialogue.append({speakers[0]: msg1})
         messages.append({"role": "assistant", "content": msg1})
         if total_chars >= max_chars:
             break
-        # Speaker 2
         if i < turns - 1:
             guest_messages = messages.copy()
-            guest_messages[0] = {"role": "system", "content": systems[1]}
+            guest_messages[0] = {"role": "system", "content": systems[1] + " " + discussion_instruction}
             chat2 = client.chat.completions.create(
                 messages=guest_messages,
                 model="llama-3.1-8b-instant",
                 temperature=0.7
             )
             msg2 = chat2.choices[0].message.content.strip()
-            if total_chars + len(msg2) > max_chars:
-                msg2 = msg2[:max_chars - total_chars]
             total_chars += len(msg2)
             dialogue.append({speakers[1]: msg2})
             messages.append({"role": "assistant", "content": msg2})
