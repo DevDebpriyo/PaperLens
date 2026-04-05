@@ -32,23 +32,9 @@ class Database:
                 await conn.execute(
                     """
                     CREATE TABLE IF NOT EXISTS current_raids (
-                        unique_id BIGINT PRIMARY KEY,
-                        server_name TEXT,
-                        server_id BIGINT,
-                        channel_id BIGINT,
-                        bot_name TEXT,
-                        bot_id BIGINT,
-                        spawn_time BIGINT,
-                        end_time BIGINT,
-                        raid_boss TEXT,
-                        is_event BOOLEAN,
-                        raid_tier INT,
-                        raid_id TEXT,
-                        raider_roles JSONB,
-                        raider_required JSONB,
-                        invite_link TEXT,
-                        image_url TEXT,
-                        saved_at BIGINT
+                    id SERIAL PRIMARY KEY,
+                    user TEXT,
+                    
                     )
                 """
                 )

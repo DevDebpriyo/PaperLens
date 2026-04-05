@@ -1,11 +1,20 @@
-import uvicorn
-from fastapi import FastAPI
-from routes.health import router as health_router
+import subprocess
+import ujson as json
 
-app = FastAPI(title="Hacktropica API")
+bot_files = ["host.py","mongodb.py","postgres.py"]
 
-app.include_router(health_router)
+processes = []
 
+try:
+    for bot_file in bot_files:
+        print(f"Starting {bot_file}...")
+        process = subprocess.Popen(["python", bot_file])
+        processes.append(process)
+    
+    for process in processes:
+        process.wait()
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5050)
+except KeyboardInterrupt:
+    print("\nShutting down bots...")
+    for process in processes:
+        process.terminate()
