@@ -150,9 +150,24 @@ export function About() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=2500",   // ~60% more than original +=5500 to accommodate HowItWorks
+          end: "+=4000",
           scrub: 1.5,
           pin: true,
+          onLeave: () => {
+            // GSAP pin has fully released — now make the white section sticky
+            // so the footer (z-10 in page.tsx) rises over it naturally
+            if (!sectionRef.current) return;
+            sectionRef.current.style.position = "sticky";
+            sectionRef.current.style.top = "0px";
+            sectionRef.current.style.zIndex = "0";
+          },
+          onEnterBack: () => {
+            // User scrolled back into the animation zone — reset for re-play
+            if (!sectionRef.current) return;
+            sectionRef.current.style.position = "";
+            sectionRef.current.style.top = "";
+            sectionRef.current.style.zIndex = "20";
+          },
         },
       });
 
@@ -258,8 +273,8 @@ export function About() {
 
       tl.to({}, { duration: 2 }); // brief hold so user can see HowItWorks
 
-      // Reset zIndex so sections below (BentoGrid, FAQ, Footer) are visible after pin releases
-      tl.set(sectionRef.current, { zIndex: 20 });
+      // Lower zIndex so footer/sections below can rise above the white about section
+      tl.set(sectionRef.current, { zIndex: 0 });
     });
 
     return () => ctx.revert();
@@ -301,7 +316,7 @@ export function About() {
         {/* Description */}
         <div
           ref={paraRef}
-          className="text-center text-xl md:text-2xl lg:text-4xl text-amber-400 font-medium leading-[1.6] px-4 max-w-5xl"
+          className="text-center text-xl md:text-2xl lg:text-4xl text-white font-medium leading-[1.6] px-4 max-w-5xl"
         >
           {words.map((word, wIdx) => (
             <span key={wIdx}>
@@ -373,7 +388,7 @@ export function About() {
         style={{ opacity: 0 }}
       >
         {/* Title */}
-        <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black uppercase text-center mt-[15px] mb-12 md:mb-16">
+        <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-black uppercase text-center mt-[25px] mb-12 md:mb-16">
           Features
         </h2>
 

@@ -3,8 +3,6 @@ import { Hero } from "@/components/landing/Hero";
 import { IntentBox } from "@/components/landing/IntentBox";
 
 import { Logos } from "@/components/landing/Marquee";
-import PaperLensBentoGrid from "@/components/landing/BentoGrid";
-import FAQ from "@/components/landing/Faq";
 import { Footer } from "@/components/landing/Footer";
 import { ReactLenis } from 'lenis/react';
 
@@ -15,7 +13,7 @@ import { About } from "@/components/landing/About";
 export default function LandingPage() {
   return (
     <ReactLenis root>
-      <main className="flex flex-col w-full min-h-screen bg-[#fbe1b1] text-[#354230]">
+      <main className="flex flex-col w-full bg-[#fbe1b1] text-[#354230]">
         <Navbar />
         {/* Intro block in normal flow so following sections (including footer) render correctly */}
         <div className="relative z-10">
@@ -27,11 +25,15 @@ export default function LandingPage() {
         {/* <ScrollRevealGallery /> */}
         <About />
 
-        <PaperLensBentoGrid />
-        <div className="opacity-0">
-          <FAQ />
+        {/* Explicit scroll space so GSAP's pinSpacing has room to work.
+            Without content below, the page ends too early for the animation. */}
+        <div style={{ height: "200vh" }} aria-hidden="true" />
+
+        {/* These sections sit at z-10, above the sticky About (z-0),
+            so they naturally scroll over the white background */}
+        <div className="relative z-10">
+          <Footer />
         </div>
-        <Footer />
       </main>
     </ReactLenis>
   );
