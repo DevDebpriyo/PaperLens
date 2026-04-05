@@ -54,21 +54,17 @@ SYSTEMS = {
 }
 
 def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 5000, level: str = "friend") -> dict:
-    speakers = SPEAKER_NAMES.get(level, SPEAKER_NAMES["friend"])
     systems = SYSTEMS.get(level, SYSTEMS["friend"])
-    discussion_instruction = (
-        "The podcast must be a normal discussion about the topic, not related to YouTube videos, uploads, or any video content. "
-        "Each speaker must not speak more than 2 sentences per turn. "
-        "The total conversation must not exceed 8000 characters. "
-        "Use the correct voice for each speaker as defined."
-    )
+    concise_instruction = " Each response must be concise (2-3 lines), to the point, and not verbose. Do not exceed 2-3 lines per turn. Keep the conversation focused and short."
+    system_host = systems[0] + concise_instruction
+    system_guest = systems[1] + concise_instruction
     messages = [
-        {"role": "system", "content": systems[0] + " " + discussion_instruction},
+        {"role": "system", "content": system_host},
         {"role": "user", "content": f"Let's discuss this research paper: {paper_text[:8000]}"}
     ]
     dialogue = []
     total_chars = 0
-    max_chars = 8000
+    voice_ids = list(VOICE_IDS_PAIR.get(level, VOICE_IDS_PAIR["friend"]))
     for i in range(turns):
         chat1 = client.chat.completions.create(
             messages=messages,
@@ -76,26 +72,38 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
             temperature=0.7
         )
         msg1 = chat1.choices[0].message.content.strip()
+        msg1_lines = msg1.splitlines()
+        msg1 = "\n".join(msg1_lines[:3])
+        if total_chars + len(msg1) > max_chars:
+            msg1 = msg1[:max_chars - total_chars]
         total_chars += len(msg1)
-        dialogue.append({speakers[0]: msg1})
+        dialogue.append({"voiceid": voice_ids[0], "text": msg1})
         messages.append({"role": "assistant", "content": msg1})
         if total_chars >= max_chars:
             break
+        # Speaker 2
         if i < turns - 1:
             guest_messages = messages.copy()
-            guest_messages[0] = {"role": "system", "content": systems[1] + " " + discussion_instruction}
+            guest_messages[0] = {"role": "system", "content": system_guest}
             chat2 = client.chat.completions.create(
                 messages=guest_messages,
                 model="llama-3.1-8b-instant",
                 temperature=0.7
             )
             msg2 = chat2.choices[0].message.content.strip()
+            msg2_lines = msg2.splitlines()
+            msg2 = "\n".join(msg2_lines[:3])
+            if total_chars + len(msg2) > max_chars:
+                msg2 = msg2[:max_chars - total_chars]
             total_chars += len(msg2)
-            dialogue.append({speakers[1]: msg2})
+            dialogue.append({"voiceid": voice_ids[1], "text": msg2})
             messages.append({"role": "assistant", "content": msg2})
             if total_chars >= max_chars:
                 break
-    return {"dialogue": dialogue}
+    if dialogue:
+        return dialogue
+    else:
+        return None
 
 def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str) -> str:
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
@@ -120,19 +128,11 @@ def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str) -> str
     except Exception as e:
         return f"Error generating speech: {str(e)}"
 
-def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str) -> str:
-    # Defensive: always resolve speakers and voices by value, not by index
-    speakers = SPEAKER_NAMES.get(level, SPEAKER_NAMES["friend"])
-    voice_ids = VOICE_IDS_PAIR.get(level, VOICE_IDS_PAIR["friend"])
+def multi_podcast_labs(conversation: list, output_path: str) -> str:
     temp_files = []
-    for idx, turn in enumerate(dialogue_dict["dialogue"]):
-        speaker, text = list(turn.items())[0]
-        if speaker == speakers[0]:
-            voice_id = voice_ids[0]
-        elif speaker == speakers[1]:
-            voice_id = voice_ids[1]
-        else:
-            voice_id = voice_ids[idx % 2]
+    for entry in conversation:
+        voice_id = entry["voiceid"]
+        text = entry["text"]
         temp_mp3 = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         text_to_speech_elevenlabs(text, temp_mp3.name, voice_id)
         temp_files.append(temp_mp3.name)

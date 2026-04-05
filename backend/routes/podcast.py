@@ -13,13 +13,15 @@ class PodcastRequest(BaseModel):
 
 @router.post("/podcast/voice")
 async def podcast_voice(request: PodcastRequest):
-    dialogue_dict = ai_podcast_conversation(request.text, level=request.level)
+    conversation = ai_podcast_conversation(request.text, level=request.level)
+    if not conversation:
+        return {"error": "No conversation generated"}, 500
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
         mp3_path = tmp.name
     api_key = os.getenv("ELEVEN_LABS_API_KEY")
     if not api_key:
         return {"error": "ELEVEN_LABS_API_KEY not set"}, 500
-    result_path = multi_podcast_labs(dialogue_dict, request.level, mp3_path)
+    result_path = multi_podcast_labs(conversation, mp3_path)
     if not os.path.exists(result_path):
         return {"error": "Failed to generate podcast audio"}, 500
     return FileResponse(result_path, media_type="audio/mpeg", filename="podcast.mp3")
