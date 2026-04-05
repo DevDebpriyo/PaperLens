@@ -1,0 +1,119 @@
+.card {
+  width: 132px;
+  min-width: 132px;
+  border-radius: 18px;
+  border: 1px solid rgba(84, 186, 176, 0.35);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(34, 211, 238, 0.16), transparent 54%),
+    radial-gradient(circle at 84% 100%, rgba(20, 184, 166, 0.22), transparent 56%),
+    linear-gradient(165deg, rgba(9, 29, 34, 0.96) 0%, rgba(10, 23, 33, 0.98) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 14px 22px rgba(2, 14, 18, 0.34);
+  padding: 10px 10px 8px;
+  color: #d7fbff;
+}
+
+.scene {
+  height: 92px;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% -22%, rgba(255, 255, 255, 0.26), transparent 46%),
+    linear-gradient(180deg, #06252f 0%, #08202e 100%);
+}
+
+.speaker {
+  position: absolute;
+  bottom: 20px;
+  width: 24px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #d7e6ff, #9ab3e8);
+  box-shadow: 0 6px 10px rgba(5, 24, 33, 0.35);
+}
+
+.speakerLeft {
+  left: 22px;
+  animation: bobLeft 2.5s ease-in-out infinite;
+}
+
+.speakerRight {
+  right: 22px;
+  animation: bobRight 2.5s ease-in-out infinite;
+}
+
+.mic {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 10px;
+  height: 26px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #22d3ee 0%, #0ea5a3 100%);
+  transform: translateX(-50%);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
+}
+
+.wave {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(125, 244, 236, 0.35);
+  border-radius: 50%;
+  transform: translateX(-50%) scale(0.75);
+  animation: waveRing 1.8s ease-out infinite;
+}
+
+.meta {
+  margin-top: 7px;
+}
+
+.title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #dcffff;
+  letter-spacing: 0.03em;
+}
+
+.subtitle {
+  margin: 1px 0 0;
+  font-size: 10px;
+  color: #8ecfd6;
+}
+
+@keyframes bobLeft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes bobRight {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+
+  50% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes waveRing {
+  0% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(0.72);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.18);
+  }
+}
