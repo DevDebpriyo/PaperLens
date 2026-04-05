@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 data/tokens.json
 cloner.py
+test.py
