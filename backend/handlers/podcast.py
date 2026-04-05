@@ -101,6 +101,7 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
             if total_chars >= max_chars:
                 break
     if dialogue:
+        print(dialogue)
         return dialogue
     else:
         return None
