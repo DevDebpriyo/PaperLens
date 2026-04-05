@@ -80,3 +80,39 @@
     0 0 18px rgba(160, 216, 255, 0.5),
     0 0 10px rgba(200, 240, 255, 0.4) inset;
 }
+
+:global(.dark) .glassRadioGroup {
+  --bg: rgba(24, 30, 44, 0.82);
+  --text: #d9dff0;
+  border: 1px solid #2e3550;
+  box-shadow:
+    inset 1px 1px 4px rgba(255, 255, 255, 0.08),
+    inset -1px -1px 6px rgba(0, 0, 0, 0.45),
+    0 8px 20px rgba(1, 4, 10, 0.45);
+}
+
+:global(.dark) .glassRadioGroup label:hover,
+:global(.dark) .glassRadioGroup input:checked + label {
+  color: #fff;
+}
+
+:global(.dark) .silver .glassGlider {
+  background: linear-gradient(135deg, rgba(162, 179, 202, 0.34), #8ea0b8);
+  box-shadow:
+    0 0 18px rgba(142, 160, 184, 0.35),
+    0 0 10px rgba(194, 207, 225, 0.16) inset;
+}
+
+:global(.dark) .gold .glassGlider {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.32), #ffc857);
+  box-shadow:
+    0 0 18px rgba(255, 200, 87, 0.35),
+    0 0 10px rgba(255, 225, 143, 0.2) inset;
+}
+
+:global(.dark) .platinum .glassGlider {
+  background: linear-gradient(135deg, rgba(121, 137, 255, 0.35), #7796ff);
+  box-shadow:
+    0 0 18px rgba(119, 150, 255, 0.36),
+    0 0 10px rgba(183, 197, 255, 0.2) inset;
+}

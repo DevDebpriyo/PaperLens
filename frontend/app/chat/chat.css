@@ -1,4 +1,4 @@
-/* ===== CHAT PAGE STYLES ===== */
+﻿/* ===== CHAT PAGE STYLES ===== */
 
 /* Layout */
 .chat-page {
@@ -1195,4 +1195,347 @@
 .sidebar-collapsed-icon-btn:hover {
   background: #f5f3ff;
   color: #a855f7;
+}
+
+.chat-theme-toggle-wrap {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 60;
+}
+
+.chat-theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #ddd9e8;
+  background: rgba(255, 255, 255, 0.88);
+  color: #6d28d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 18px rgba(31, 31, 47, 0.1);
+}
+
+.chat-theme-toggle-btn:hover {
+  transform: translateY(-1px);
+  border-color: #c4b5fd;
+  box-shadow: 0 12px 24px rgba(109, 40, 217, 0.2);
+}
+
+.chat-theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== DARK THEME ===== */
+.dark .chat-page {
+  background: #090b10;
+  color: #e8ecf6;
+}
+
+.dark .chat-sidebar {
+  background: #0f121a;
+  border-right-color: #212638;
+}
+
+.dark .sidebar-logo {
+  color: #f3f4f6;
+}
+
+.dark .sidebar-collapse-btn,
+.dark .sidebar-logout-btn,
+.dark .sidebar-expand-btn,
+.dark .sidebar-collapsed-icon-btn {
+  color: #98a1b7;
+}
+
+.dark .sidebar-collapse-btn:hover,
+.dark .sidebar-logout-btn:hover,
+.dark .sidebar-expand-btn:hover,
+.dark .sidebar-collapsed-icon-btn:hover {
+  background: #1c2233;
+  color: #d9deea;
+}
+
+.dark .new-chat-btn {
+  background: #f59e0b;
+  color: #1b1f2a;
+}
+
+.dark .new-chat-btn:hover {
+  background: #fbbf24;
+}
+
+.dark .sidebar-search input {
+  background: #151a27;
+  border-color: #2b3146;
+  color: #d6dceb;
+}
+
+.dark .sidebar-search input::placeholder {
+  color: #8791aa;
+}
+
+.dark .sidebar-search input:focus {
+  border-color: #8b5cf6;
+}
+
+.dark .sidebar-search .search-icon {
+  color: #8a93a9;
+}
+
+.dark .sidebar-search .sparkle-icon {
+  color: #bf8bff;
+}
+
+.dark .history-label,
+.dark .sidebar-user-email {
+  color: #8893ab;
+}
+
+.dark .history-item,
+.dark .sidebar-user-name {
+  color: #d8dde9;
+}
+
+.dark .history-item:hover {
+  background: #1a2130;
+}
+
+.dark .sidebar-footer {
+  border-top-color: #212638;
+}
+
+.dark .sidebar-avatar {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+}
+
+.dark .chat-main {
+  background:
+    radial-gradient(circle at 25% -10%, rgba(124, 58, 237, 0.22), transparent 38%),
+    radial-gradient(circle at 88% 3%, rgba(251, 191, 36, 0.08), transparent 34%),
+    linear-gradient(180deg, #121624 0%, #0f131d 45%, #0b0e15 100%);
+}
+
+.dark .chat-theme-toggle-btn {
+  border-color: #313a53;
+  background: rgba(17, 22, 34, 0.82);
+  color: #e9e3ff;
+  box-shadow: 0 10px 24px rgba(1, 3, 8, 0.45);
+}
+
+.dark .chat-theme-toggle-btn:hover {
+  border-color: #4c5a81;
+  box-shadow: 0 14px 26px rgba(76, 90, 129, 0.35);
+}
+
+.dark .greeting-hello {
+  color: #ffb347 !important;
+  text-shadow: 0 0 20px rgba(255, 166, 0, 0.3);
+}
+
+.dark .greeting-question {
+  color: #edf1ff;
+}
+
+.dark .chat-input-box {
+  background: #121826;
+  border-color: #2b3145;
+  box-shadow: 0 12px 34px rgba(2, 5, 12, 0.5);
+}
+
+.dark .chat-input-field {
+  color: #e6ecfb;
+}
+
+.dark .chat-input-field::placeholder {
+  color: #8e9ab3;
+}
+
+.dark .chat-input-field-shell-locked {
+  background: #191e2c;
+}
+
+.dark .chat-input-field-locked,
+.dark .chat-input-field-locked::placeholder {
+  color: #7f879e;
+}
+
+.dark .input-lock-tooltip,
+.dark .upload-lock-tooltip {
+  background: #0c1019;
+  border: 1px solid #2f3650;
+  color: #e8edfa;
+  box-shadow: 0 12px 24px rgba(3, 7, 15, 0.5);
+}
+
+.dark .mode-dropdown-trigger {
+  border-color: #44417a;
+  background: linear-gradient(180deg, #1a2031 0%, #151b2a 100%);
+  color: #d7ccff;
+  box-shadow: 0 6px 16px rgba(8, 12, 22, 0.45);
+}
+
+.dark .mode-dropdown-trigger:hover {
+  border-color: #6f6ab5;
+  box-shadow: 0 8px 18px rgba(35, 39, 72, 0.45);
+}
+
+.dark .mode-dropdown-trigger-open {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+.dark .mode-dropdown-context {
+  color: #a5acf7;
+}
+
+.dark .mode-dropdown-value,
+.dark .mode-dropdown-item-title {
+  color: #e7dcff;
+}
+
+.dark .mode-dropdown-caret {
+  border-right-color: #a7afff;
+  border-bottom-color: #a7afff;
+}
+
+.dark .mode-dropdown-menu {
+  border-color: #313a53;
+  background: #111827;
+  box-shadow: 0 18px 35px rgba(3, 7, 16, 0.55);
+}
+
+.dark .mode-dropdown-item:hover {
+  background: #1c2438;
+}
+
+.dark .mode-dropdown-item-active {
+  background: linear-gradient(135deg, #2b2744 0%, #232b40 100%);
+}
+
+.dark .mode-dropdown-item-description,
+.dark .mode-dropdown-preview {
+  color: #9aa4c0;
+}
+
+.dark .mode-dropdown-preview {
+  border-top-color: #2b3145;
+}
+
+.dark .input-action-icon {
+  color: #9ca8bf;
+}
+
+.dark .input-action-icon:hover {
+  background: #1f2638;
+  color: #e2e7f2;
+}
+
+.dark .attach-file-trigger-active {
+  color: #c4b5fd;
+}
+
+.dark .attach-file-trigger-disabled,
+.dark .attach-file-trigger-disabled:hover {
+  background: #1c2232;
+  color: #6f7890;
+}
+
+.dark .attach-file-count {
+  border-color: #121826;
+}
+
+.dark .upload-workflow-panel {
+  border-top-color: #2b3145;
+}
+
+.dark .upload-workflow-title {
+  color: #d7c7ff;
+}
+
+.dark .upload-clear-all-btn {
+  color: #c6b2ff;
+}
+
+.dark .upload-clear-all-btn:hover {
+  color: #dfd2ff;
+}
+
+.dark .upload-workflow-list::-webkit-scrollbar-thumb {
+  background: #394059;
+}
+
+.dark .upload-file-card {
+  border-color: #2d3550;
+  background: linear-gradient(180deg, #161d2c 0%, #131a27 100%);
+}
+
+.dark .upload-file-chip {
+  background: #2a3249;
+  color: #c4b5fd;
+}
+
+.dark .upload-file-name {
+  color: #eef2fb;
+}
+
+.dark .upload-file-meta {
+  color: #92a0bc;
+}
+
+.dark .upload-file-status-uploading {
+  background: #2e2847;
+  color: #ccb7ff;
+}
+
+.dark .upload-file-status-processing {
+  background: #453718;
+  color: #ffd889;
+}
+
+.dark .upload-file-status-ready {
+  background: #1f3c30;
+  color: #8af0b5;
+}
+
+.dark .upload-file-status-error {
+  background: #4a2428;
+  color: #ffb7b7;
+}
+
+.dark .upload-progress-track {
+  background: #2b3145;
+}
+
+.dark .upload-include-btn,
+.dark .upload-retry-btn,
+.dark .upload-remove-btn {
+  border-color: #2f3650;
+  background: #171f30;
+  color: #c9d1e5;
+}
+
+.dark .upload-include-btn:hover,
+.dark .upload-retry-btn:hover,
+.dark .upload-remove-btn:hover {
+  background: #232c41;
+  border-color: #4b5779;
+}
+
+.dark .upload-include-btn-on {
+  background: #2a2842;
+  border-color: #5b57a1;
+  color: #ece6ff;
+}
+
+.dark .upload-remove-btn {
+  color: #adb6cb;
+}
+
+.dark .upload-error-copy {
+  color: #ffb6be;
 }
