@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./chat.css";
 import NovaGlow from "./NovaGlow";
 import GlassPlanSelector from "./GlassPlanSelector";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 /* ─── SVG Icon Components ─── */
 
@@ -506,6 +507,23 @@ export default function ChatPage() {
     [],
   );
 
+  useEffect(() => {
+    const persistedTheme = localStorage.getItem("theme");
+
+    if (persistedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+      return;
+    }
+
+    if (persistedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+      return;
+    }
+
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.classList.toggle("dark", prefersDark);
+  }, []);
+
   return (
     <div className="chat-page">
       {/* ===== SIDEBAR ===== */}
@@ -583,6 +601,9 @@ export default function ChatPage() {
 
       {/* ===== MAIN ===== */}
       <main className="chat-main">
+        <div className="chat-theme-toggle-wrap">
+          <AnimatedThemeToggler className="chat-theme-toggle-btn" aria-label="Toggle theme" />
+        </div>
 
         {/* Center Content */}
         <div className="chat-center">
