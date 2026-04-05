@@ -27,7 +27,7 @@ async def story_voice(request: StoryRequest):
         if not api_key:
             print("[story_voice] ELEVEN_LABS_API_KEY not set!")
             return {"error": "ELEVEN_LABS_API_KEY not set"}, 500
-        result = text_to_speech_elevenlabs(story, mp3_path, request.level, api_key)
+        result = text_to_speech_elevenlabs(story, mp3_path, request.level)
         if not os.path.exists(mp3_path) or os.path.getsize(mp3_path) == 0:
             print(f"[story_voice] Failed to generate mp3: {result}")
             return {"error": result}, 500
