@@ -2,8 +2,15 @@
 
 **PaperLens** is an AI-powered educational and research tool. It ingests user-provided content (either via direct prompt or PDF upload) and transforms that information into highly digestible, multimodal formats. The platform utilizes Large Language Models (LLMs) to ensure content validity before processing it into customized stories, two-speaker podcasts, or answering context-specific questions.
 
+## 📑 Table of Contents
+- [Core Scope](#core-scope)
+- [System Architecture & Workflow](#system-architecture-workflow)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+
 ---
 
+<a id="core-scope"></a>
 ## 🚀 Core Scope
 
 The current MVP (Minimum Viable Product) for the hackathon focuses on three primary pillars of content transformation:
@@ -14,88 +21,40 @@ The current MVP (Minimum Viable Product) for the hackathon focuses on three prim
 
 ---
 
+<a id="system-architecture-workflow"></a>
 ## 🏗 System Architecture & Workflow
 
 The application follows a linear authentication flow before branching into three parallel feature sets from the main dashboard.
 
 ```mermaid
 graph TD
-    %% Define Nodes and Styles
-    Start([User Login via Clerk])
-    Dash{Main Dashboard}
+    Start[Login via Clerk] --> Dash[Main Dashboard]
     
-    %% Branches from Dashboard
-    Dash --->|Select Flow| ModA[Module A: Story Generation]
-    Dash --->|Select Flow| ModB[Module B: Podcast Generation]
-    Dash --->|Select Flow| ModC[Module C: Context Q & A]
+    Dash -->|Select Flow| ModA[Module A: Story Gen]
+    Dash -->|Select Flow| ModB[Module B: Podcast Gen]
+    Dash -->|Select Flow| ModC[Module C: Local Q&A]
     
-    %% Story Generation Flow
-    subgraph Story Flow
-        InputA[Upload PDF / Prompt]
-        ValA{Legit Check}
-        BreakA[Reject Request]
-        ProcA[Extract Text]
-        GenA[LLM: Beginner/Int/Adv Story]
-        TTSA[TTS Audio Conversion]
-        OutA([Audio Story])
-    end
-    ModA --> InputA
-    InputA --> ValA
-    ValA -- Invalid --> BreakA
-    ValA -- Valid --> ProcA
-    ProcA --> GenA
-    GenA --> TTSA
-    TTSA --> OutA
+    ModA --> InputA[Upload Document / Prompt]
+    InputA --> ValA[System Legit Check]
+    ValA -->|Invalid| BreakA[REJECTED]
+    ValA -->|Valid| ProcA[Extrapolate Details]
+    ProcA --> GenA[LLM: Beginner/Int/Adv]
+    GenA --> TTSA[Text-to-Speech Engine]
+    TTSA --> OutA[Final Audio Story]
 
-    %% Podcast Generation Flow
-    subgraph Podcast Flow
-        InputB[Upload PDF / Prompt]
-        ValB{Legit Check}
-        BreakB[Reject Request]
-        ProcB[Extract Text]
-        GenB[LLM: Host & Guest Script]
-        TTSB[TTS: Dual-Voice]
-        OutB([Audio Podcast])
-    end
-    ModB --> InputB
-    InputB --> ValB
-    ValB -- Invalid --> BreakB
-    ValB -- Valid --> ProcB
-    ProcB --> GenB
-    GenB --> TTSB
-    TTSB --> OutB
+    ModB --> InputB[Upload Document / Prompt]
+    InputB --> ValB[System Legit Check]
+    ValB -->|Invalid| BreakB[REJECTED]
+    ValB -->|Valid| ProcB[Extrapolate Details]
+    ProcB --> GenB[LLM: Host Profile]
+    GenB --> TTSB[TTS: Dual Voice Engine]
+    TTSB --> OutB[Final Audio Podcast]
 
-    %% Q&A Flow
-    subgraph Q&A Flow
-        InputC[Ask Specific Question]
-        ValC{Context Check}
-        BreakC[Reject Out-of-Context]
-        GenC[LLM: Targeted Response]
-        OutC([Text Output])
-    end
-    ModC --> InputC
-    InputC --> ValC
-    ValC -- Invalid --> BreakC
-    ValC -- Valid --> GenC
-    GenC --> OutC
-
-    %% Connections
-    Start --> Dash
-    
-    %% Styling
-    classDef startend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff;
-    classDef module fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;
-    classDef valid fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
-    classDef error fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff;
-    classDef process fill:#475569,stroke:#334155,stroke-width:1px,color:#fff;
-    classDef breakNode fill:#ef4444,stroke:#b91c1c,stroke-width:1px,color:#fff;
-    
-    class Start,OutA,OutB,OutC startend;
-    class ModA,ModB,ModC module;
-    class Dash module;
-    class ValA,ValB,ValC valid;
-    class BreakA,BreakB,BreakC breakNode;
-    class InputA,InputB,InputC,ProcA,ProcB,GenA,GenB,GenC,TTSA,TTSB process;
+    ModC --> InputC[Prompt Specifying Topic]
+    InputC --> ValC[Context Bounds Check]
+    ValC -->|Invalid| BreakC[REJECTED]
+    ValC -->|Valid| GenC[LLM: Context Targeted Resp]
+    GenC --> OutC[On-topic Response Output]
 ```
 
 ### 1. Entry Protocol
@@ -103,30 +62,30 @@ graph TD
 - **Dashboard:** The central hub where the user selects their desired content transformation path.
 
 ### 2. Module A: Story Generation
-- **Input:** The user either uploads a PDF or enters a text prompt.
-- **Validation (LLM Check & Legit Check):** The system evaluates the input. If the content is deemed invalid or inappropriate ("No"), the process breaks.
-- **Processing:** The system extracts the text from the valid source.
-- **Generation:** An LLM generates a story based on the text. The user can dictate the complexity by selecting: *Beginner*, *Intermediate*, or *Advanced*.
-- **Audio Conversion:** The generated text is passed through a Text-to-Speech (TTS) engine.
-- **Output:** The final audio-story is generated and presented to the user.
+- **Input / Extraction:** The user can either manually upload a PDF, or enter a text prompt. 
+  - *ArXiv Hook:* If a text prompt is supplied, the backend (`search_arxiv`) dynamically scrapes the latest academic paper matching the topic and automatically downloads the PDF.
+- **Validation:** The system runs a Legit Check to ensure the paper meets necessary knowledge limits.
+- **Processing:** **PyMuPDF** extracts and sanitizes the source text from the paper.
+- **Generation:** An LLM engine parses the text and constructs an adaptive narrative based on the requested complexity curve (*Beginner*, *Intermediate*, or *Advanced*).
+- **Audio Conversion:** The finalized story script is handed over to the **ElevenLabs API**, generating a high-quality, seamlessly spoken MP3 file.
+- **Output:** The final audio-story is presented on the client via native Audio playback.
 
 ### 3. Module B: Podcast Generation
-- **Input:** PDF Upload or User Prompt.
-- **Validation:** Similar to Module A, an "LLM Check / Legit Check" acts as a gatekeeper. Invalid inputs break the loop.
-- **Processing:** Text is extracted from the approved input.
-- **Generation:** The LLM structures the text into a conversational script featuring two personas: a Host and a Guest.
-- **Audio Conversion:** The script is processed via TTS utilizing distinct voices for the Host and Guest.
-- **Output:** The final audio podcast is generated.
+- **Input / Extraction:** Follows the exact robust pipeline as Module A (direct PDF / automated ArXiv retrieval).
+- **Generation:** The LLM structures the core concepts from the text into a colloquial, conversational two-party script featuring a standard "Host" and "Guest".
+- **Audio Conversion:** This is routed directly into an advanced implementation (`multi_podcast_labs`) powered by the **ElevenLabs API**, carefully mapping distinct voice profiles to the Host and Guest strings for an automated, multi-character auditory experience.
+- **Output:** The compiled dialogue is delivered as a generated MP3 podcast.
 
-### 4. Module C: Q/A (Question & Answer)
-- **Input:** The user asks a specific question.
-- **Validation (Context Check):** The system checks if the question is strictly related to the provided research paper/context.
-  - *If No:* The process breaks (preventing hallucinations or off-topic usage).
-  - *If Yes:* The system proceeds.
-- **Output:** The LLM generates a targeted response based purely on the source material.
+### 4. Module C: Local Q/A Agent
+- **Input:** The user asks a specific, localized question based on their uploaded content.
+- **Validation (Context Check):** Hallucinations are actively mitigated. The chat module checks if the query strictly pertains to the active research paper bounds.
+  - *If Off-topic:* The LLM rejects the request and breaks the loop.
+  - *If On-topic:* The system proceeds.
+- **Output:** A generated, targeted response is displayed based purely on the document's extracted knowledge graph.
 
 ---
 
+<a id="tech-stack"></a>
 ## 💻 Tech Stack
 
 | Layer | Category | Technologies |
@@ -144,6 +103,7 @@ graph TD
 
 ---
 
+<a id="getting-started"></a>
 ## ⚙️ Getting Started
 
 ### Prerequisites
