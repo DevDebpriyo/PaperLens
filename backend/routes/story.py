@@ -23,10 +23,10 @@ async def story_voice(request: StoryRequest):
         print(f"[story_voice] Generated story (length={len(story)}): {story[:100]}...")
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp:
             mp3_path = tmp.name
-        api_key = os.getenv("ELEVENLABS_API_KEY")
+        api_key = os.getenv("ELEVEN_LABS_API_KEY")
         if not api_key:
-            print("[story_voice] ELEVENLABS_API_KEY not set!")
-            return {"error": "ELEVENLABS_API_KEY not set"}, 500
+            print("[story_voice] ELEVEN_LABS_API_KEY not set!")
+            return {"error": "ELEVEN_LABS_API_KEY not set"}, 500
         result = text_to_speech_elevenlabs(story, mp3_path, request.level, api_key)
         if not os.path.exists(mp3_path) or os.path.getsize(mp3_path) == 0:
             print(f"[story_voice] Failed to generate mp3: {result}")
