@@ -1,6 +1,7 @@
 import fitz  
 import json
 from groq import Groq
+import asyncio
 
 def get_groq_client():
     with open("tokens.json", "r") as f:
@@ -18,7 +19,7 @@ def get_groq_client():
 
 client = get_groq_client()
 
-def extract_pdf_text(pdf_path: str) -> str:
+def extract_pdf_text(pdf_path: str) -> dict:
     try:
         text_content = ""
         
@@ -30,7 +31,9 @@ def extract_pdf_text(pdf_path: str) -> str:
         
         pdf_document.close()
         
-        return text_content
+        loop = asyncio.get_event_loop()
+        validation_result = loop.run_until_complete(validate_pdf(text_content))
+        return {"text": text_content, "validation": validation_result}
     
     except FileNotFoundError:
         raise FileNotFoundError(f"PDF file not found at: {pdf_path}")
