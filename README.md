@@ -26,36 +26,7 @@ The current MVP (Minimum Viable Product) for the hackathon focuses on three prim
 
 The application follows a linear authentication flow before branching into three parallel feature sets from the main dashboard.
 
-```mermaid
-graph TD
-    Start[Login via Clerk] --> Dash[Main Dashboard]
-    
-    Dash -->|Select Flow| ModA[Module A: Story Gen]
-    Dash -->|Select Flow| ModB[Module B: Podcast Gen]
-    Dash -->|Select Flow| ModC[Module C: Local Q&A]
-    
-    ModA --> InputA[Upload Document / Prompt]
-    InputA --> ValA[System Legit Check]
-    ValA -->|Invalid| BreakA[REJECTED]
-    ValA -->|Valid| ProcA[Extrapolate Details]
-    ProcA --> GenA[LLM: Beginner/Int/Adv]
-    GenA --> TTSA[Text-to-Speech Engine]
-    TTSA --> OutA[Final Audio Story]
-
-    ModB --> InputB[Upload Document / Prompt]
-    InputB --> ValB[System Legit Check]
-    ValB -->|Invalid| BreakB[REJECTED]
-    ValB -->|Valid| ProcB[Extrapolate Details]
-    ProcB --> GenB[LLM: Host Profile]
-    GenB --> TTSB[TTS: Dual Voice Engine]
-    TTSB --> OutB[Final Audio Podcast]
-
-    ModC --> InputC[Prompt Specifying Topic]
-    InputC --> ValC[Context Bounds Check]
-    ValC -->|Invalid| BreakC[REJECTED]
-    ValC -->|Valid| GenC[LLM: Context Targeted Resp]
-    GenC --> OutC[On-topic Response Output]
-```
+![System Architecture & Workflow Diagram](./frontend/public/image.png)
 
 ### 1. Entry Protocol
 - **Login:** User authentication layer via **Clerk** (Completed ✅).
