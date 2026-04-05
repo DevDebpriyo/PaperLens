@@ -65,27 +65,26 @@ graph TD
 - **Dashboard:** The central hub where the user selects their desired content transformation path.
 
 ### 2. Module A: Story Generation
-- **Input:** The user either uploads a PDF or enters a text prompt.
-- **Validation (LLM Check & Legit Check):** The system evaluates the input. If the content is deemed invalid or inappropriate ("No"), the process breaks.
-- **Processing:** The system extracts the text from the valid source.
-- **Generation:** An LLM generates a story based on the text. The user can dictate the complexity by selecting: *Beginner*, *Intermediate*, or *Advanced*.
-- **Audio Conversion:** The generated text is passed through a Text-to-Speech (TTS) engine.
-- **Output:** The final audio-story is generated and presented to the user.
+- **Input / Extraction:** The user can either manually upload a PDF, or enter a text prompt. 
+  - *ArXiv Hook:* If a text prompt is supplied, the backend (`search_arxiv`) dynamically scrapes the latest academic paper matching the topic and automatically downloads the PDF.
+- **Validation:** The system runs a Legit Check to ensure the paper meets necessary knowledge limits.
+- **Processing:** **PyMuPDF** extracts and sanitizes the source text from the paper.
+- **Generation:** An LLM engine parses the text and constructs an adaptive narrative based on the requested complexity curve (*Beginner*, *Intermediate*, or *Advanced*).
+- **Audio Conversion:** The finalized story script is handed over to the **ElevenLabs API**, generating a high-quality, seamlessly spoken MP3 file.
+- **Output:** The final audio-story is presented on the client via native Audio playback.
 
 ### 3. Module B: Podcast Generation
-- **Input:** PDF Upload or User Prompt.
-- **Validation:** Similar to Module A, an "LLM Check / Legit Check" acts as a gatekeeper. Invalid inputs break the loop.
-- **Processing:** Text is extracted from the approved input.
-- **Generation:** The LLM structures the text into a conversational script featuring two personas: a Host and a Guest.
-- **Audio Conversion:** The script is processed via TTS utilizing distinct voices for the Host and Guest.
-- **Output:** The final audio podcast is generated.
+- **Input / Extraction:** Follows the exact robust pipeline as Module A (direct PDF / automated ArXiv retrieval).
+- **Generation:** The LLM structures the core concepts from the text into a colloquial, conversational two-party script featuring a standard "Host" and "Guest".
+- **Audio Conversion:** This is routed directly into an advanced implementation (`multi_podcast_labs`) powered by the **ElevenLabs API**, carefully mapping distinct voice profiles to the Host and Guest strings for an automated, multi-character auditory experience.
+- **Output:** The compiled dialogue is delivered as a generated MP3 podcast.
 
-### 4. Module C: Q/A (Question & Answer)
-- **Input:** The user asks a specific question.
-- **Validation (Context Check):** The system checks if the question is strictly related to the provided research paper/context.
-  - *If No:* The process breaks (preventing hallucinations or off-topic usage).
-  - *If Yes:* The system proceeds.
-- **Output:** The LLM generates a targeted response based purely on the source material.
+### 4. Module C: Local Q/A Agent
+- **Input:** The user asks a specific, localized question based on their uploaded content.
+- **Validation (Context Check):** Hallucinations are actively mitigated. The chat module checks if the query strictly pertains to the active research paper bounds.
+  - *If Off-topic:* The LLM rejects the request and breaks the loop.
+  - *If On-topic:* The system proceeds.
+- **Output:** A generated, targeted response is displayed based purely on the document's extracted knowledge graph.
 
 ---
 
