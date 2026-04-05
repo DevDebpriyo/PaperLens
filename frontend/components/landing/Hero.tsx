@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import RotatingText from "@/components/ui/rotating-text";
 
 export function Hero() {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,7 +32,7 @@ export function Hero() {
 
             {/* Text Overlay 1 */}
             <div
-                className="absolute text-center z-10 pointer-events-none font-sans tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-600 drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]"
+                className="absolute flex items-center justify-center gap-4 text-center z-10 pointer-events-none font-sans tracking-tighter drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]"
                 style={{
                     left: '52.5%',
                     top: '48.5%',
@@ -42,7 +43,19 @@ export function Hero() {
                     lineHeight: '87px',
                 }}
             >
-                See Papers Differently,
+                <span className="bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-600">See Papers</span>
+                <RotatingText
+                    texts={['Differently,', 'Interactively,', 'Intelligently,', 'Beautifully,']}
+                    mainClassName="px-4 bg-amber-500 text-[#1A1A1A] overflow-hidden py-1 justify-center rounded-2xl"
+                    staggerFrom={"last"}
+                    initial={{ y: "100%" }}
+                    animate={{ y: 0 }}
+                    exit={{ y: "-120%" }}
+                    staggerDuration={0.025}
+                    splitLevelClassName="overflow-hidden pb-1"
+                    transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                    rotationInterval={2000}
+                />
             </div>
 
             {/* Text Overlay 2 */}
