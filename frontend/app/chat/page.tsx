@@ -211,27 +211,6 @@ const LogoutIcon = () => (
   </svg>
 );
 
-/* ─── Data ─── */
-
-const todayChats = [
-  "Create a detailed 7-day sprint plan f...",
-  "Draft a concise email to stakeholder...",
-  "Analyze the 'Eisenhower Matrix' an...",
-];
-
-const yesterdayChats = [
-  "Summarize the main differences be...",
-  "I need to negotiate an extension for ...",
-];
-
-const sevenDayChats = [
-  "Generate 5 effective morning habits...",
-  "As a non-technical PM, list 5 crucial...",
-  "Help me allocate 8 hours tomorrow:...",
-  "We need a creative name for our ne...",
-  "Write a 100-word positive feedback...",
-];
-
 type UploadState = "uploading" | "processing" | "ready" | "error";
 
 type UploadedFileItem = {
@@ -250,6 +229,12 @@ type ChatMessageItem = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  createdAt: string;
+};
+
+type ChatHistoryItem = {
+  id: string;
+  text: string;
   createdAt: string;
 };
 
@@ -285,6 +270,10 @@ export default function ChatPage() {
   const [isSendingChat, setIsSendingChat] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [chatClientId, setChatClientId] = useState("");
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isUploadDragActive, setIsUploadDragActive] = useState(false);
   const [uploadDialogError, setUploadDialogError] = useState<string | null>(null);
@@ -301,6 +290,49 @@ export default function ChatPage() {
   const isInputLockedByUpload = isStoryOrPodcastMode && hasUploadedFiles;
   const isUploadLockedByPrompt = isStoryOrPodcastMode && hasTypedPrompt;
   const hasConversation = chatMessages.length > 0 || isSendingChat || Boolean(chatError);
+
+  const groupedHistory = useMemo(() => {
+    const now = new Date();
+    const startToday = new Date(now);
+    startToday.setHours(0, 0, 0, 0);
+
+    const startYesterday = new Date(startToday);
+    startYesterday.setDate(startYesterday.getDate() - 1);
+
+    const startSevenDays = new Date(startToday);
+    startSevenDays.setDate(startSevenDays.getDate() - 7);
+
+    const groups = {
+      today: [] as ChatHistoryItem[],
+      yesterday: [] as ChatHistoryItem[],
+      sevenDays: [] as ChatHistoryItem[],
+    };
+
+    chatHistory.forEach((item) => {
+      const createdAt = new Date(item.createdAt);
+
+      if (Number.isNaN(createdAt.getTime())) {
+        groups.sevenDays.push(item);
+        return;
+      }
+
+      if (createdAt >= startToday) {
+        groups.today.push(item);
+        return;
+      }
+
+      if (createdAt >= startYesterday) {
+        groups.yesterday.push(item);
+        return;
+      }
+
+      if (createdAt >= startSevenDays) {
+        groups.sevenDays.push(item);
+      }
+    });
+
+    return groups;
+  }, [chatHistory]);
 
   const storyTones = useMemo(
     () => [
@@ -356,6 +388,27 @@ export default function ChatPage() {
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const formatHistoryPreview = (text: string, maxChars = 52) => {
+    const compactText = text.trim().split(/\s+/).join(" ");
+    if (compactText.length <= maxChars) return compactText;
+    return `${compactText.slice(0, maxChars).trimEnd()}...`;
+  };
+
+  const getOrCreateClientId = () => {
+    const storageKey = "paperlens_chat_client_id";
+    const existingClientId = localStorage.getItem(storageKey);
+    if (existingClientId) return existingClientId;
+
+    const generatedClientId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+    localStorage.setItem(storageKey, generatedClientId);
+    setChatClientId(generatedClientId);
+    return generatedClientId;
   };
 
   const createMessageId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -452,17 +505,30 @@ export default function ChatPage() {
     };
 
     setChatMessages((previous) => [...previous, userMessage]);
+    setChatHistory((previous) => [
+      {
+        id: userMessage.id,
+        text: userMessage.content,
+        createdAt: userMessage.createdAt,
+      },
+      ...previous,
+    ]);
     setPromptText("");
     setChatError(null);
     setIsSendingChat(true);
 
     try {
+      const effectiveClientId = chatClientId || getOrCreateClientId();
+
       const response = await fetch(chatEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({
+          message,
+          client_id: effectiveClientId,
+        }),
       });
 
       const rawBody = await response.text();
@@ -662,6 +728,18 @@ export default function ChatPage() {
     setUploadedFiles([]);
   };
 
+  const handleNewChat = () => {
+    clearAllUploads();
+    setPromptText("");
+    setChatMessages([]);
+    setChatError(null);
+    setIsSendingChat(false);
+    setIsModeDropdownOpen(false);
+    setHoveredTone(null);
+    setIsUploadDialogOpen(false);
+    setUploadDialogError(null);
+  };
+
   const toggleIncludeInPrompt = (uploadId: string) => {
     setUploadedFiles((previous) =>
       previous.map((item) =>
@@ -731,6 +809,73 @@ export default function ChatPage() {
   }, [chatMessages, isSendingChat]);
 
   useEffect(() => {
+    setChatClientId(getOrCreateClientId());
+  }, []);
+
+  useEffect(() => {
+    if (!chatClientId || !chatEndpoint) return;
+
+    let canceled = false;
+
+    const loadChatHistory = async () => {
+      setIsHistoryLoading(true);
+      setHistoryError(null);
+
+      try {
+        const query = `client_id=${encodeURIComponent(chatClientId)}&limit=60`;
+        const response = await fetch(`${chatEndpoint}?${query}`);
+
+        if (!response.ok) {
+          throw new Error(`Unable to fetch history (status ${response.status}).`);
+        }
+
+        const payload = (await response.json()) as {
+          history?: Array<{ id?: string; text?: string; createdAt?: string }>;
+        };
+
+        const items = Array.isArray(payload.history) ? payload.history : [];
+        const normalizedHistory = items
+          .map((item, index) => {
+            const text = typeof item.text === "string" ? item.text.trim() : "";
+            const createdAt =
+              typeof item.createdAt === "string" && item.createdAt
+                ? item.createdAt
+                : new Date().toISOString();
+
+            const fallbackId = `${chatClientId}-${createdAt}-${index}`;
+            const id = typeof item.id === "string" && item.id ? item.id : fallbackId;
+
+            return { id, text, createdAt };
+          })
+          .filter((item) => item.text.length > 0);
+
+        if (!canceled) {
+          setChatHistory(normalizedHistory);
+        }
+      } catch (error) {
+        if (!canceled) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Unable to load chat history right now.";
+          setHistoryError(message);
+          setChatHistory([]);
+        }
+      } finally {
+        if (!canceled) {
+          setIsHistoryLoading(false);
+        }
+      }
+    };
+
+    void loadChatHistory();
+
+    return () => {
+      canceled = true;
+    };
+  }, [chatClientId, chatEndpoint]);
+
+  useEffect(() => {
     if (!isUploadDialogOpen) return;
 
     const handleEscape = (event: KeyboardEvent) => {
@@ -773,7 +918,7 @@ export default function ChatPage() {
             </div>
 
             {/* New Chat */}
-            <button className="new-chat-btn">
+            <button className="new-chat-btn" onClick={handleNewChat}>
               <PlusIcon /> New chat
             </button>
 
@@ -786,20 +931,48 @@ export default function ChatPage() {
 
             {/* Chat History */}
             <div className="sidebar-history">
-              <div className="history-label">Today</div>
-              {todayChats.map((text, i) => (
-                <div key={`t-${i}`} className="history-item">{text}</div>
-              ))}
+              {isHistoryLoading && <div className="history-item">Loading chat history...</div>}
 
-              <div className="history-label">Yesterday</div>
-              {yesterdayChats.map((text, i) => (
-                <div key={`y-${i}`} className="history-item">{text}</div>
-              ))}
+              {!isHistoryLoading && historyError && (
+                <div className="history-item">{historyError}</div>
+              )}
 
-              <div className="history-label">7 days</div>
-              {sevenDayChats.map((text, i) => (
-                <div key={`s-${i}`} className="history-item">{text}</div>
-              ))}
+              {!isHistoryLoading && !historyError && chatHistory.length === 0 && (
+                <div className="history-item">No saved chats yet. Start a conversation.</div>
+              )}
+
+              {groupedHistory.today.length > 0 && (
+                <>
+                  <div className="history-label">Today</div>
+                  {groupedHistory.today.map((item) => (
+                    <div key={item.id} className="history-item" title={item.text}>
+                      {formatHistoryPreview(item.text)}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {groupedHistory.yesterday.length > 0 && (
+                <>
+                  <div className="history-label">Yesterday</div>
+                  {groupedHistory.yesterday.map((item) => (
+                    <div key={item.id} className="history-item" title={item.text}>
+                      {formatHistoryPreview(item.text)}
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {groupedHistory.sevenDays.length > 0 && (
+                <>
+                  <div className="history-label">7 days</div>
+                  {groupedHistory.sevenDays.map((item) => (
+                    <div key={item.id} className="history-item" title={item.text}>
+                      {formatHistoryPreview(item.text)}
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
 
             {/* User Footer */}
@@ -820,7 +993,7 @@ export default function ChatPage() {
               <ExpandIcon />
             </button>
             
-            <button className="sidebar-collapsed-icon-btn" aria-label="New chat" title="New chat">
+            <button className="sidebar-collapsed-icon-btn" aria-label="New chat" title="New chat" onClick={handleNewChat}>
               <PlusIcon />
             </button>
             
@@ -864,7 +1037,7 @@ export default function ChatPage() {
                   <span className="chat-thread-subtitle">AI conversation stream</span>
                 </div>
                 <span className={`chat-endpoint-badge ${chatEndpoint ? "chat-endpoint-badge-on" : "chat-endpoint-badge-off"}`}>
-                  {chatEndpoint ? "" : "Backend missing"}
+                  {chatEndpoint ? "Backend connected" : "Backend missing"}
                 </span>
               </div>
 
