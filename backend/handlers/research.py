@@ -11,7 +11,7 @@ import json
 load_dotenv()
 
 def get_groq_client():
-    with open("data/tokens.json", "r") as f:
+    with open("tokens.json", "r") as f:
         keys = list(json.load(f).values())
     last_exception = None
     for key in keys:
