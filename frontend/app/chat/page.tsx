@@ -533,7 +533,16 @@ export default function ChatPage() {
             {/* Header */}
             <div className="sidebar-header">
               <div className="sidebar-logo">
-                <img src="/paperlens.png" alt="PaperLens" className="sidebar-logo-img" />
+                <img
+                  src="/paperlens.png"
+                  alt="PaperLens"
+                  className="sidebar-logo-img sidebar-logo-img-light"
+                />
+                <img
+                  src="/paperlens-dark.png"
+                  alt="PaperLens"
+                  className="sidebar-logo-img sidebar-logo-img-dark"
+                />
               </div>
               <button className="sidebar-collapse-btn" aria-label="Collapse sidebar" onClick={() => setSidebarOpen(false)}>
                 <CollapseIcon />

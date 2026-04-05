@@ -46,6 +46,18 @@
   object-fit: contain;
 }
 
+.sidebar-logo-img-dark {
+  display: none;
+}
+
+.dark .sidebar-logo-img-light {
+  display: none;
+}
+
+.dark .sidebar-logo-img-dark {
+  display: block;
+}
+
 .sidebar-collapse-btn {
   width: 28px;
   height: 28px;
