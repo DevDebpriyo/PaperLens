@@ -31,14 +31,17 @@ def generate_story_from_text(extracted_text: str, level: str = "beginner") -> st
         system_prompt = (
             "You are a creative assistant. Given the extracted text from a research paper, write a very short, simple story (max 2000 characters) that conveys the main ideas in a fun, easy-to-understand way for beginners."
         )
+        char_limit = 2000
     elif level == "intermediate":
         system_prompt = (
             "You are a creative assistant. Given the extracted text from a research paper, write a medium-length story (max 3500 characters) that explains the main ideas and findings in a clear, engaging way for someone with some background knowledge."
         )
+        char_limit = 3500
     else:
         system_prompt = (
             "You are a creative assistant. Given the extracted text from a research paper, write a detailed, engaging story (max 5000 characters) that conveys the main ideas and findings in a narrative style for a general audience."
         )
+        char_limit = 5000
 
     prompt = f"Write a story based on the following research paper text. Limit the story to {char_limit} characters.\n\n{extracted_text[:12000]}"
     try:
