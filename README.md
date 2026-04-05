@@ -3,13 +3,14 @@
 **PaperLens** is an AI-powered educational and research tool. It ingests user-provided content (either via direct prompt or PDF upload) and transforms that information into highly digestible, multimodal formats. The platform utilizes Large Language Models (LLMs) to ensure content validity before processing it into customized stories, two-speaker podcasts, or answering context-specific questions.
 
 ## 📑 Table of Contents
-- [Core Scope](#-core-scope)
-- [System Architecture & Workflow](#-system-architecture--workflow)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#️-getting-started)
+- [Core Scope](#core-scope)
+- [System Architecture & Workflow](#system-architecture-workflow)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
 
 ---
 
+<a id="core-scope"></a>
 ## 🚀 Core Scope
 
 The current MVP (Minimum Viable Product) for the hackathon focuses on three primary pillars of content transformation:
@@ -20,6 +21,7 @@ The current MVP (Minimum Viable Product) for the hackathon focuses on three prim
 
 ---
 
+<a id="system-architecture-workflow"></a>
 ## 🏗 System Architecture & Workflow
 
 The application follows a linear authentication flow before branching into three parallel feature sets from the main dashboard.
@@ -87,6 +89,7 @@ graph TD
 
 ---
 
+<a id="tech-stack"></a>
 ## 💻 Tech Stack
 
 | Layer | Category | Technologies |
@@ -104,6 +107,7 @@ graph TD
 
 ---
 
+<a id="getting-started"></a>
 ## ⚙️ Getting Started
 
 ### Prerequisites
