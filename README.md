@@ -2,6 +2,12 @@
 
 **PaperLens** is an AI-powered educational and research tool. It ingests user-provided content (either via direct prompt or PDF upload) and transforms that information into highly digestible, multimodal formats. The platform utilizes Large Language Models (LLMs) to ensure content validity before processing it into customized stories, two-speaker podcasts, or answering context-specific questions.
 
+## 📑 Table of Contents
+- [Core Scope](#-core-scope)
+- [System Architecture & Workflow](#-system-architecture--workflow)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#️-getting-started)
+
 ---
 
 ## 🚀 Core Scope
@@ -20,82 +26,36 @@ The application follows a linear authentication flow before branching into three
 
 ```mermaid
 graph TD
-    %% Define Nodes and Styles
-    Start([User Login via Clerk])
-    Dash{Main Dashboard}
+    Start((Login via Clerk)) --> Dash{Main Dashboard}
     
-    %% Branches from Dashboard
-    Dash --->|Select Flow| ModA[Module A: Story Generation]
-    Dash --->|Select Flow| ModB[Module B: Podcast Generation]
-    Dash --->|Select Flow| ModC[Module C: Context Q & A]
+    Dash -->|Select Flow| ModA[Module A: Story Gen]
+    Dash -->|Select Flow| ModB[Module B: Podcast Gen]
+    Dash -->|Select Flow| ModC[Module C: Local Q&A]
     
-    %% Story Generation Flow
-    subgraph Story Flow
-        InputA[Upload PDF / Prompt]
-        ValA{Legit Check}
-        BreakA[Reject Request]
-        ProcA[Extract Text]
-        GenA[LLM: Beginner/Int/Adv Story]
-        TTSA[TTS Audio Conversion]
-        OutA([Audio Story])
-    end
-    ModA --> InputA
-    InputA --> ValA
-    ValA -- Invalid --> BreakA
-    ValA -- Valid --> ProcA
-    ProcA --> GenA
-    GenA --> TTSA
-    TTSA --> OutA
+    %% Story Generator Flow
+    ModA --> InputA[Upload Document / Prompt]
+    InputA --> ValA{System Legit Check}
+    ValA -- Invalid --> BreakA((REJECTED))
+    ValA -- Valid --> ProcA[Extrapolate Details]
+    ProcA --> GenA[LLM: Beginner/Int/Adv]
+    GenA --> TTSA[Text-to-Speech Engine]
+    TTSA --> OutA(((Final Audio Story)))
 
     %% Podcast Generation Flow
-    subgraph Podcast Flow
-        InputB[Upload PDF / Prompt]
-        ValB{Legit Check}
-        BreakB[Reject Request]
-        ProcB[Extract Text]
-        GenB[LLM: Host & Guest Script]
-        TTSB[TTS: Dual-Voice]
-        OutB([Audio Podcast])
-    end
-    ModB --> InputB
-    InputB --> ValB
-    ValB -- Invalid --> BreakB
-    ValB -- Valid --> ProcB
-    ProcB --> GenB
-    GenB --> TTSB
-    TTSB --> OutB
+    ModB --> InputB[Upload Document / Prompt]
+    InputB --> ValB{System Legit Check}
+    ValB -- Invalid --> BreakB((REJECTED))
+    ValB -- Valid --> ProcB[Extrapolate Details]
+    ProcB --> GenB[LLM: Host Profile]
+    GenB --> TTSB[TTS: Dual Voice Engine]
+    TTSB --> OutB(((Final Audio Podcast)))
 
     %% Q&A Flow
-    subgraph Q&A Flow
-        InputC[Ask Specific Question]
-        ValC{Context Check}
-        BreakC[Reject Out-of-Context]
-        GenC[LLM: Targeted Response]
-        OutC([Text Output])
-    end
-    ModC --> InputC
-    InputC --> ValC
-    ValC -- Invalid --> BreakC
-    ValC -- Valid --> GenC
-    GenC --> OutC
-
-    %% Connections
-    Start --> Dash
-    
-    %% Styling
-    classDef startend fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff;
-    classDef module fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;
-    classDef valid fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
-    classDef error fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff;
-    classDef process fill:#475569,stroke:#334155,stroke-width:1px,color:#fff;
-    classDef breakNode fill:#ef4444,stroke:#b91c1c,stroke-width:1px,color:#fff;
-    
-    class Start,OutA,OutB,OutC startend;
-    class ModA,ModB,ModC module;
-    class Dash module;
-    class ValA,ValB,ValC valid;
-    class BreakA,BreakB,BreakC breakNode;
-    class InputA,InputB,InputC,ProcA,ProcB,GenA,GenB,GenC,TTSA,TTSB process;
+    ModC --> InputC[Prompt Specifying Topic]
+    InputC --> ValC{Context Bounds Check}
+    ValC -- Invalid --> BreakC((REJECTED))
+    ValC -- Valid --> GenC[LLM: Context Targeted Resp]
+    GenC --> OutC(((On-topic Response Output)))
 ```
 
 ### 1. Entry Protocol
