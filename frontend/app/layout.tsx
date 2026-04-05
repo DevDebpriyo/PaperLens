@@ -38,12 +38,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+  const isClerkEnabled = Boolean(clerkPublishableKey)
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
-        <ClerkProvider>
-          {children}
-        </ClerkProvider>
+        {isClerkEnabled ? (
+          <ClerkProvider publishableKey={clerkPublishableKey}>
+            {children}
+          </ClerkProvider>
+        ) : (
+          children
+        )}
       </body>
     </html>
   )

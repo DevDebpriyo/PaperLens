@@ -10,6 +10,7 @@ import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 export function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -44,62 +45,74 @@ export function Navbar() {
 
                     {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-3">
-                        {/* Always show UserButton when signed in */}
-                        <Show when="signed-in">
-                            <UserButton
-                                appearance={{
-                                    elements: {
-                                        userButtonAvatarBox: "w-10 h-10 ring-2 ring-white/20",
-                                    },
-                                }}
-                            />
-                        </Show>
+                        {clerkEnabled ? (
+                            <>
+                                {/* Always show UserButton when signed in */}
+                                <Show when="signed-in">
+                                    <UserButton
+                                        appearance={{
+                                            elements: {
+                                                userButtonAvatarBox: "w-10 h-10 ring-2 ring-white/20",
+                                            },
+                                        }}
+                                    />
+                                </Show>
 
-                        {/* Signed-out: initial = Login + Signup, scrolled = Explore PaperLens */}
-                        <Show when="signed-out">
-                            <div
-                                className={cn(
-                                    "flex items-center gap-3 transition-all duration-500",
-                                    scrolled ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"
-                                )}
-                            >
-                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                    <div id="navbar-login-btn">
-                                        <LiquidMetalButton
-                                            label="Login"
-                                            onClick={() => {}}
-                                            width={120}
-                                        />
+                                {/* Signed-out: initial = Login + Signup, scrolled = Explore PaperLens */}
+                                <Show when="signed-out">
+                                    <div
+                                        className={cn(
+                                            "flex items-center gap-3 transition-all duration-500",
+                                            scrolled ? "opacity-0 pointer-events-none w-0 overflow-hidden" : "opacity-100"
+                                        )}
+                                    >
+                                        <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                            <div id="navbar-login-btn">
+                                                <LiquidMetalButton
+                                                    label="Login"
+                                                    onClick={() => {}}
+                                                    width={120}
+                                                />
+                                            </div>
+                                        </SignInButton>
+                                        <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                                            <div id="navbar-signup-btn">
+                                                <LiquidMetalButton
+                                                    label="Sign Up"
+                                                    onClick={() => {}}
+                                                    width={120}
+                                                    variant="white"
+                                                />
+                                            </div>
+                                        </SignUpButton>
                                     </div>
-                                </SignInButton>
-                                <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
-                                    <div id="navbar-signup-btn">
-                                        <LiquidMetalButton
-                                            label="Sign Up"
-                                            onClick={() => {}}
-                                            width={120}
-                                            variant="white"
-                                        />
+                                    <div
+                                        className={cn(
+                                            "transition-all duration-500",
+                                            scrolled ? "opacity-100" : "opacity-0 pointer-events-none w-0 overflow-hidden"
+                                        )}
+                                    >
+                                        <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                            <div>
+                                                <LiquidMetalButton
+                                                    label="Getting Started"
+                                                    onClick={() => {}}
+                                                    width={190}
+                                                />
+                                            </div>
+                                        </SignInButton>
                                     </div>
-                                </SignUpButton>
-                            </div>
-                            <div
-                                className={cn(
-                                    "transition-all duration-500",
-                                    scrolled ? "opacity-100" : "opacity-0 pointer-events-none w-0 overflow-hidden"
-                                )}
-                            >
-                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                    <div>
-                                        <LiquidMetalButton
-                                            label="Getting Started"
-                                            onClick={() => {}}
-                                            width={190}
-                                        />
-                                    </div>
-                                </SignInButton>
-                            </div>
-                        </Show>
+                                </Show>
+                            </>
+                        ) : (
+                            <Link href="/chat">
+                                <LiquidMetalButton
+                                    label="Getting Started"
+                                    onClick={() => {}}
+                                    width={190}
+                                />
+                            </Link>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -127,50 +140,62 @@ export function Navbar() {
                         onClick={() => setMobileMenuOpen(false)}
                     />
                     <div className="md:hidden fixed top-18 left-2 right-2 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20 shadow-2xl p-4 space-y-3 z-50 ring-1 ring-white/10 flex flex-col items-center">
-                        <Show when="signed-out">
-                            {scrolled ? (
-                                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                    <div>
-                                        <LiquidMetalButton
-                                            label="Getting Started"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                            width={280}
-                                        />
-                                    </div>
-                                </SignInButton>
-                            ) : (
-                                <div className="flex flex-col items-center gap-3 w-full">
-                                    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                                        <div id="mobile-login-btn" onClick={() => setMobileMenuOpen(false)}>
-                                            <LiquidMetalButton
-                                                label="Login"
-                                                onClick={() => {}}
-                                                width={280}
-                                            />
+                        {clerkEnabled ? (
+                            <>
+                                <Show when="signed-out">
+                                    {scrolled ? (
+                                        <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                            <div>
+                                                <LiquidMetalButton
+                                                    label="Getting Started"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                    width={280}
+                                                />
+                                            </div>
+                                        </SignInButton>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-3 w-full">
+                                            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                                                <div id="mobile-login-btn" onClick={() => setMobileMenuOpen(false)}>
+                                                    <LiquidMetalButton
+                                                        label="Login"
+                                                        onClick={() => {}}
+                                                        width={280}
+                                                    />
+                                                </div>
+                                            </SignInButton>
+                                            <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                                                <div id="mobile-signup-btn" onClick={() => setMobileMenuOpen(false)}>
+                                                    <LiquidMetalButton
+                                                        label="Sign Up"
+                                                        onClick={() => {}}
+                                                        width={280}
+                                                        variant="white"
+                                                    />
+                                                </div>
+                                            </SignUpButton>
                                         </div>
-                                    </SignInButton>
-                                    <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
-                                        <div id="mobile-signup-btn" onClick={() => setMobileMenuOpen(false)}>
-                                            <LiquidMetalButton
-                                                label="Sign Up"
-                                                onClick={() => {}}
-                                                width={280}
-                                                variant="white"
-                                            />
-                                        </div>
-                                    </SignUpButton>
-                                </div>
-                            )}
-                        </Show>
-                        <Show when="signed-in">
-                            <UserButton
-                                appearance={{
-                                    elements: {
-                                        userButtonAvatarBox: "w-16 h-16 ring-2 ring-white/20",
-                                    },
-                                }}
-                            />
-                        </Show>
+                                    )}
+                                </Show>
+                                <Show when="signed-in">
+                                    <UserButton
+                                        appearance={{
+                                            elements: {
+                                                userButtonAvatarBox: "w-16 h-16 ring-2 ring-white/20",
+                                            },
+                                        }}
+                                    />
+                                </Show>
+                            </>
+                        ) : (
+                            <Link href="/chat" onClick={() => setMobileMenuOpen(false)}>
+                                <LiquidMetalButton
+                                    label="Open Workspace"
+                                    onClick={() => {}}
+                                    width={280}
+                                />
+                            </Link>
+                        )}
                     </div>
                 </>
             )}
