@@ -1,9 +1,10 @@
-from fastapi import APIRouter, File, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import tempfile
 import os
 import time
-from handlers import extract_pdf_text, search_arxiv, choose_best_project, download_pdf
+from handlers import generate_story_from_text, text_to_speech_elevenlabs
 
 router = APIRouter()
 
@@ -42,21 +43,26 @@ async def upload_file(file: UploadFile = File(...)):
 
 
 @router.post("/user/prompt")
-async def submit_prompt(request: PromptRequest):
+async def submit_prompt(request: PromptRequest, background_tasks: BackgroundTasks):
     try:
-        papers = search_arxiv(request.prompt)
-        if not papers or len(papers) < 1:
-            return {"error": "No papers found for this prompt."}, 404
-        best_title = choose_best_project(papers)
-        best_paper = next((p for p in papers if best_title.strip().lower() in p['title'].strip().lower()), None)
-        if not best_paper:
-            best_paper = papers[0] 
+        story = generate_story_from_text(request.prompt, level="beginner")
+
         temp_dir = tempfile.gettempdir()
-        pdf_name = f"{int(time.time())}.pdf"
-        pdf_path = os.path.join(temp_dir, pdf_name)
-        download_pdf(best_paper['pdf'], pdf_path)
-        extracted_text = extract_pdf_text(pdf_path)
-        os.remove(pdf_path)
-        return {"text": extracted_text, "message": "Best paper text extracted successfully"}, 200
+        audio_filename = f"story_{int(time.time())}.mp3"
+        audio_path = os.path.join(temp_dir, audio_filename)
+
+        result = text_to_speech_elevenlabs(story, audio_path, level="beginner")
+
+        if result.startswith("Error"):
+            return {"text": story, "message": "Story generated but TTS failed.", "error": result}
+
+        background_tasks.add_task(os.remove, audio_path)
+
+        return FileResponse(
+            path=audio_path,
+            media_type="audio/mpeg",
+            filename=audio_filename,
+        )
+
     except Exception as e:
-        return {"text": str(e), "message": "Failed to process prompt"}, 500
+        return {"text": str(e), "message": "Failed to generate story from prompt."}
