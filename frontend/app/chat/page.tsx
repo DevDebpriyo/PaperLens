@@ -140,6 +140,13 @@ const MicIcon = () => (
   </svg>
 );
 
+const SendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 2 11 13" />
+    <path d="m22 2-7 20-4-9-9-4Z" />
+  </svg>
+);
+
 const StarSparkle = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z" />
@@ -239,6 +246,13 @@ type UploadedFileItem = {
   errorMessage?: string;
 };
 
+type ChatMessageItem = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+};
+
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
 
 /* ─── Expand Icon (for collapsed sidebar) ─── */
@@ -267,12 +281,26 @@ export default function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTimersRef = useRef<Record<string, { intervalId?: number; timeoutId?: number }>>({});
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
+  const [isSendingChat, setIsSendingChat] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isUploadDragActive, setIsUploadDragActive] = useState(false);
+  const [uploadDialogError, setUploadDialogError] = useState<string | null>(null);
+
+  const chatEndpoint = useMemo(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
+    if (!baseUrl) return "";
+    return `${baseUrl.replace(/\/+$/, "")}/chat`;
+  }, []);
 
   const isStoryOrPodcastMode = selectedMode !== "platinum";
   const hasUploadedFiles = uploadedFiles.length > 0;
   const hasTypedPrompt = promptText.trim().length > 0;
   const isInputLockedByUpload = isStoryOrPodcastMode && hasUploadedFiles;
   const isUploadLockedByPrompt = isStoryOrPodcastMode && hasTypedPrompt;
+  const hasConversation = chatMessages.length > 0 || isSendingChat || Boolean(chatError);
 
   const storyTones = useMemo(
     () => [
@@ -328,6 +356,144 @@ export default function ChatPage() {
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
     return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const createMessageId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  const isPdfFile = (file: File) =>
+    file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+  const extractReplyText = (value: unknown): string | null => {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const candidate = extractReplyText(item);
+        if (candidate) return candidate;
+      }
+      return null;
+    }
+
+    if (value && typeof value === "object") {
+      const responseObject = value as Record<string, unknown>;
+      const priorityKeys = ["response", "reply", "message", "text", "answer", "output"];
+
+      for (const key of priorityKeys) {
+        const candidate = extractReplyText(responseObject[key]);
+        if (candidate) return candidate;
+      }
+
+      for (const nestedValue of Object.values(responseObject)) {
+        const candidate = extractReplyText(nestedValue);
+        if (candidate) return candidate;
+      }
+    }
+
+    return null;
+  };
+
+  const parseAssistantReply = (payload: unknown) => {
+    const extractedText = extractReplyText(payload);
+    if (extractedText) return extractedText;
+
+    if (payload && typeof payload === "object") {
+      return JSON.stringify(payload, null, 2);
+    }
+
+    if (typeof payload === "number" || typeof payload === "boolean") {
+      return String(payload);
+    }
+
+    return "The server returned an empty response.";
+  };
+
+  const formatMessageTime = (isoTimestamp: string) =>
+    new Date(isoTimestamp).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const parseErrorMessage = (status: number, payload: unknown) => {
+    if (payload && typeof payload === "object") {
+      const responseObject = payload as Record<string, unknown>;
+      const detail = responseObject.detail;
+      const error = responseObject.error;
+      const message = responseObject.message;
+
+      if (typeof detail === "string" && detail.trim()) return detail;
+      if (typeof error === "string" && error.trim()) return error;
+      if (typeof message === "string" && message.trim()) return message;
+    }
+
+    if (typeof payload === "string" && payload.trim()) {
+      return payload;
+    }
+
+    return `Request failed with status ${status}.`;
+  };
+
+  const sendChatMessage = async () => {
+    const message = promptText.trim();
+
+    if (!message || isInputLockedByUpload || isSendingChat) return;
+
+    if (!chatEndpoint) {
+      setChatError("Backend URL is missing. Set NEXT_PUBLIC_BACKEND_URL in your environment.");
+      return;
+    }
+
+    const userMessage: ChatMessageItem = {
+      id: createMessageId(),
+      role: "user",
+      content: message,
+      createdAt: new Date().toISOString(),
+    };
+
+    setChatMessages((previous) => [...previous, userMessage]);
+    setPromptText("");
+    setChatError(null);
+    setIsSendingChat(true);
+
+    try {
+      const response = await fetch(chatEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      const rawBody = await response.text();
+      let payload: unknown = rawBody;
+
+      if (rawBody) {
+        try {
+          payload = JSON.parse(rawBody);
+        } catch {
+          payload = rawBody;
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(parseErrorMessage(response.status, payload));
+      }
+
+      const assistantMessage: ChatMessageItem = {
+        id: createMessageId(),
+        role: "assistant",
+        content: parseAssistantReply(payload),
+        createdAt: new Date().toISOString(),
+      };
+
+      setChatMessages((previous) => [...previous, assistantMessage]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unable to connect to the backend.";
+      setChatError(errorMessage);
+    } finally {
+      setIsSendingChat(false);
+    }
   };
 
   const clearUploadTimers = (uploadId: string) => {
@@ -411,14 +577,13 @@ export default function ChatPage() {
     };
   };
 
-  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (isUploadLockedByPrompt) {
-      event.target.value = "";
+  const processSelectedFiles = (files: File[]) => {
+    if (!files.length) return;
+
+    if (files.some((file) => !isPdfFile(file))) {
+      setUploadDialogError("Only PDF files are supported. Please upload a .pdf file.");
       return;
     }
-
-    const files = Array.from(event.target.files ?? []);
-    if (!files.length) return;
 
     const newItems = files.map(createUploadItem);
     setUploadedFiles((previous) => [...newItems, ...previous]);
@@ -429,7 +594,43 @@ export default function ChatPage() {
       }
     });
 
+    setUploadDialogError(null);
+    setIsUploadDragActive(false);
+    setIsUploadDialogOpen(false);
+  };
+
+  const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isUploadLockedByPrompt) {
+      event.target.value = "";
+      return;
+    }
+
+    const files = Array.from(event.target.files ?? []);
+    processSelectedFiles(files);
     event.target.value = "";
+  };
+
+  const handleUploadDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsUploadDragActive(false);
+
+    if (isUploadLockedByPrompt) return;
+
+    const files = Array.from(event.dataTransfer.files ?? []);
+    processSelectedFiles(files);
+  };
+
+  const openUploadDialog = () => {
+    if (isUploadLockedByPrompt) return;
+    setUploadDialogError(null);
+    setIsUploadDragActive(false);
+    setIsUploadDialogOpen(true);
+  };
+
+  const closeUploadDialog = () => {
+    setIsUploadDialogOpen(false);
+    setIsUploadDragActive(false);
+    setUploadDialogError(null);
   };
 
   const removeUploadedFile = (uploadId: string) => {
@@ -524,6 +725,28 @@ export default function ChatPage() {
     document.documentElement.classList.toggle("dark", prefersDark);
   }, []);
 
+  useEffect(() => {
+    if (!chatMessagesRef.current) return;
+    chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+  }, [chatMessages, isSendingChat]);
+
+  useEffect(() => {
+    if (!isUploadDialogOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      closeUploadDialog();
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isUploadDialogOpen]);
+
+  useEffect(() => {
+    if (!isUploadDialogOpen || !isUploadLockedByPrompt) return;
+    closeUploadDialog();
+  }, [isUploadDialogOpen, isUploadLockedByPrompt]);
+
   return (
     <div className="chat-page">
       {/* ===== SIDEBAR ===== */}
@@ -615,25 +838,64 @@ export default function ChatPage() {
         </div>
 
         {/* Center Content */}
-        <div className="chat-center">
-          {/* Greeting */}
-          <div className="chat-greeting">
-            <div className="chat-orb">
-              <NovaGlow
-                hue={0}
-                hoverIntensity={0.2}
-                rotateOnHover={true}
-              />
+        <div className={`chat-center ${hasConversation ? "chat-center-active" : ""}`}>
+          {!hasConversation && (
+            <div className="chat-greeting">
+              <div className="chat-orb">
+                <NovaGlow
+                  hue={0}
+                  hoverIntensity={0.2}
+                  rotateOnHover={true}
+                />
+              </div>
+              <div className="chat-plan-selector">
+                <GlassPlanSelector onPlanChange={(plan) => setSelectedMode(plan)} />
+              </div>
+              <div className="greeting-hello" style={{ color: "#ffa500" }}>Hello, Jackson</div>
+              <div className="greeting-question">How can I assist you today?</div>
             </div>
-            <div className="chat-plan-selector">
-              <GlassPlanSelector onPlanChange={(plan) => setSelectedMode(plan)} />
-            </div>
-            <div className="greeting-hello" style={{ color: '#ffa500' }}>Hello, Jackson</div>
-            <div className="greeting-question">How can I assist you today?</div>
-          </div>
+          )}
+
+          {hasConversation && (
+            <section className="chat-thread-shell">
+              <div className="chat-thread-header">
+                <div className="chat-thread-title-wrap">
+                  <span className="chat-thread-title">PaperLens Chat</span>
+                  <span className="chat-thread-subtitle">AI conversation stream</span>
+                </div>
+                <span className={`chat-endpoint-badge ${chatEndpoint ? "chat-endpoint-badge-on" : "chat-endpoint-badge-off"}`}>
+                  {chatEndpoint ? "" : "Backend missing"}
+                </span>
+              </div>
+
+              <div className="chat-thread-list" ref={chatMessagesRef}>
+                {chatMessages.map((item) => (
+                  <div key={item.id} className={`chat-turn chat-turn-${item.role}`}>
+                    {item.role === "assistant" && <div className="chat-turn-avatar">PL</div>}
+
+                    <div className={`chat-bubble chat-bubble-${item.role}`}>
+                      <p className="chat-bubble-content">{item.content}</p>
+                      <span className="chat-bubble-time">{formatMessageTime(item.createdAt)}</span>
+                    </div>
+                  </div>
+                ))}
+
+                {isSendingChat && (
+                  <div className="chat-turn chat-turn-assistant">
+                    <div className="chat-turn-avatar">PL</div>
+                    <div className="chat-bubble chat-bubble-assistant chat-bubble-thinking">
+                      <span className="chat-typing-dot" />
+                      <span className="chat-typing-dot" />
+                      <span className="chat-typing-dot" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
 
           {/* Input Area */}
-          <div className="chat-input-wrapper">
+          <div className={`chat-input-wrapper ${hasConversation ? "chat-input-wrapper-active" : ""}`}>
             <div className="chat-input-box">
               <input
                 ref={fileInputRef}
@@ -641,7 +903,7 @@ export default function ChatPage() {
                 type="file"
                 multiple
                 onChange={handleFileSelection}
-                accept=".pdf,.txt,.md,.doc,.docx,.csv,.png,.jpg,.jpeg"
+                accept=".pdf,application/pdf"
                 disabled={isUploadLockedByPrompt}
               />
               <div className={`chat-input-field-shell ${isInputLockedByUpload ? "chat-input-field-shell-locked" : ""}`}>
@@ -649,7 +911,16 @@ export default function ChatPage() {
                   className={`chat-input-field ${isInputLockedByUpload ? "chat-input-field-locked" : ""}`}
                   type="text"
                   value={promptText}
-                  onChange={(event) => setPromptText(event.target.value)}
+                  onChange={(event) => {
+                    setPromptText(event.target.value);
+                    if (chatError) setChatError(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void sendChatMessage();
+                    }
+                  }}
                   placeholder={
                     isInputLockedByUpload
                       ? "Remove attached files to type a prompt"
@@ -717,7 +988,7 @@ export default function ChatPage() {
                     <button
                       className={`input-action-icon attach-file-trigger ${uploadedFiles.length ? "attach-file-trigger-active" : ""} ${isUploadLockedByPrompt ? "attach-file-trigger-disabled" : ""}`}
                       aria-label="Upload file"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={openUploadDialog}
                       type="button"
                       disabled={isUploadLockedByPrompt}
                     >
@@ -733,6 +1004,16 @@ export default function ChatPage() {
                       </div>
                     )}
                   </div>
+
+                  <button
+                    className={`chat-send-btn ${!promptText.trim() || isInputLockedByUpload || isSendingChat ? "chat-send-btn-disabled" : ""}`}
+                    aria-label="Send message"
+                    onClick={() => void sendChatMessage()}
+                    type="button"
+                    disabled={!promptText.trim() || isInputLockedByUpload || isSendingChat}
+                  >
+                    {isSendingChat ? <span className="chat-send-spinner" /> : <SendIcon />}
+                  </button>
 
                   <button className="mic-btn" style={{ backgroundColor: '#ffa500' }} aria-label="Voice input">
                     <MicIcon />
@@ -830,7 +1111,72 @@ export default function ChatPage() {
               )}
             </div>
           </div>
+
+          {chatError && <div className="chat-inline-error">{chatError}</div>}
         </div>
+
+        {isUploadDialogOpen && (
+          <div
+            className="upload-dialog-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="upload-dialog-title"
+            onClick={closeUploadDialog}
+          >
+            <div className="upload-dialog-card" onClick={(event) => event.stopPropagation()}>
+              <button
+                type="button"
+                className="upload-dialog-close"
+                aria-label="Close upload dialog"
+                onClick={closeUploadDialog}
+              >
+                ×
+              </button>
+
+              <div className="upload-dialog-badge">PDF</div>
+              <h3 className="upload-dialog-title" id="upload-dialog-title">Upload your PDF</h3>
+              <p className="upload-dialog-description">
+                Drag and drop your file here, or browse from your computer.
+              </p>
+
+              <div
+                className={`upload-drop-zone ${isUploadDragActive ? "upload-drop-zone-active" : ""}`}
+                onDragEnter={(event) => {
+                  event.preventDefault();
+                  setIsUploadDragActive(true);
+                }}
+                onDragOver={(event) => {
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "copy";
+                  setIsUploadDragActive(true);
+                }}
+                onDragLeave={(event) => {
+                  event.preventDefault();
+                  const related = event.relatedTarget as Node | null;
+                  if (related && event.currentTarget.contains(related)) return;
+                  setIsUploadDragActive(false);
+                }}
+                onDrop={handleUploadDrop}
+              >
+                <p className="upload-drop-title">Drag and drop your PDF here</p>
+                <p className="upload-drop-note">
+                  Only .pdf files are supported. Max size {formatFileSize(MAX_FILE_SIZE_BYTES)}.
+                </p>
+                <button
+                  type="button"
+                  className="upload-dialog-browse-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Browse
+                </button>
+              </div>
+
+              {uploadDialogError && (
+                <div className="upload-dialog-error" role="status">{uploadDialogError}</div>
+              )}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
