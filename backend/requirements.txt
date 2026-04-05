@@ -6,3 +6,4 @@ groq
 pymupdf
 ujson
 asyncpg
+python-multipart
