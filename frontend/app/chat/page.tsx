@@ -5,6 +5,8 @@ import "./chat.css";
 import NovaGlow from "./NovaGlow";
 import GlassPlanSelector from "./GlassPlanSelector";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
+import { GeneratingLoader } from "@/components/ui/GeneratingLoader";
+import { StoryModeCharacter } from "@/components/ui/StoryModeCharacter";
 
 /* ─── SVG Icon Components ─── */
 
@@ -230,6 +232,9 @@ type ChatMessageItem = {
   role: "user" | "assistant";
   content: string;
   createdAt: string;
+  kind?: "text" | "story-audio";
+  audioUrl?: string;
+  audioFileName?: string;
 };
 
 type ChatHistoryItem = {
@@ -265,6 +270,7 @@ export default function ChatPage() {
   const modeDropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTimersRef = useRef<Record<string, { intervalId?: number; timeoutId?: number }>>({});
+  const storyAudioUrlsRef = useRef<string[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFileItem[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessageItem[]>([]);
   const [isSendingChat, setIsSendingChat] = useState(false);
@@ -282,6 +288,12 @@ export default function ChatPage() {
     const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
     if (!baseUrl) return "";
     return `${baseUrl.replace(/\/+$/, "")}/chat`;
+  }, []);
+
+  const storyVoiceEndpoint = useMemo(() => {
+    const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL?.trim();
+    if (!baseUrl) return "";
+    return `${baseUrl.replace(/\/+$/, "")}/story/voice`;
   }, []);
 
   const isStoryOrPodcastMode = selectedMode !== "platinum";
@@ -413,6 +425,18 @@ export default function ChatPage() {
 
   const createMessageId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  const getStoryLevel = (): "beginner" | "intermediate" | "advanced" => {
+    if (selectedTone === "intermediate" || selectedTone === "advanced") {
+      return selectedTone;
+    }
+    return "beginner";
+  };
+
+  const revokeStoryAudioUrls = () => {
+    storyAudioUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    storyAudioUrlsRef.current = [];
+  };
+
   const isPdfFile = (file: File) =>
     file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
@@ -487,6 +511,62 @@ export default function ChatPage() {
     return `Request failed with status ${status}.`;
   };
 
+  const sendStoryVoiceMessage = async (message: string) => {
+    if (!storyVoiceEndpoint) {
+      throw new Error("Story endpoint is missing. Set NEXT_PUBLIC_BACKEND_URL in your environment.");
+    }
+
+    const level = getStoryLevel();
+    const response = await fetch(storyVoiceEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: message,
+        level,
+      }),
+    });
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!response.ok || contentType.includes("application/json")) {
+      const rawBody = await response.text();
+      let payload: unknown = rawBody;
+
+      if (rawBody) {
+        try {
+          payload = JSON.parse(rawBody);
+        } catch {
+          payload = rawBody;
+        }
+      }
+
+      throw new Error(parseErrorMessage(response.status, payload));
+    }
+
+    const audioBlob = await response.blob();
+
+    if (!audioBlob.size) {
+      throw new Error("Story audio file was empty. Please try again.");
+    }
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    storyAudioUrlsRef.current.push(audioUrl);
+
+    const assistantMessage: ChatMessageItem = {
+      id: createMessageId(),
+      role: "assistant",
+      kind: "story-audio",
+      content: `Story audio is ready (${level}).`,
+      audioUrl,
+      audioFileName: `story-${level}-${Date.now()}.mp3`,
+      createdAt: new Date().toISOString(),
+    };
+
+    setChatMessages((previous) => [...previous, assistantMessage]);
+  };
+
   const sendChatMessage = async () => {
     const message = promptText.trim();
 
@@ -518,42 +598,46 @@ export default function ChatPage() {
     setIsSendingChat(true);
 
     try {
-      const effectiveClientId = chatClientId || getOrCreateClientId();
+      if (selectedMode === "silver") {
+        await sendStoryVoiceMessage(message);
+      } else {
+        const effectiveClientId = chatClientId || getOrCreateClientId();
 
-      const response = await fetch(chatEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message,
-          client_id: effectiveClientId,
-        }),
-      });
+        const response = await fetch(chatEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message,
+            client_id: effectiveClientId,
+          }),
+        });
 
-      const rawBody = await response.text();
-      let payload: unknown = rawBody;
+        const rawBody = await response.text();
+        let payload: unknown = rawBody;
 
-      if (rawBody) {
-        try {
-          payload = JSON.parse(rawBody);
-        } catch {
-          payload = rawBody;
+        if (rawBody) {
+          try {
+            payload = JSON.parse(rawBody);
+          } catch {
+            payload = rawBody;
+          }
         }
+
+        if (!response.ok) {
+          throw new Error(parseErrorMessage(response.status, payload));
+        }
+
+        const assistantMessage: ChatMessageItem = {
+          id: createMessageId(),
+          role: "assistant",
+          content: parseAssistantReply(payload),
+          createdAt: new Date().toISOString(),
+        };
+
+        setChatMessages((previous) => [...previous, assistantMessage]);
       }
-
-      if (!response.ok) {
-        throw new Error(parseErrorMessage(response.status, payload));
-      }
-
-      const assistantMessage: ChatMessageItem = {
-        id: createMessageId(),
-        role: "assistant",
-        content: parseAssistantReply(payload),
-        createdAt: new Date().toISOString(),
-      };
-
-      setChatMessages((previous) => [...previous, assistantMessage]);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unable to connect to the backend.";
       setChatError(errorMessage);
@@ -730,6 +814,7 @@ export default function ChatPage() {
 
   const handleNewChat = () => {
     clearAllUploads();
+    revokeStoryAudioUrls();
     setPromptText("");
     setChatMessages([]);
     setChatError(null);
@@ -782,6 +867,7 @@ export default function ChatPage() {
   useEffect(
     () => () => {
       Object.keys(uploadTimersRef.current).forEach(clearUploadTimers);
+      revokeStoryAudioUrls();
     },
     [],
   );
@@ -1047,7 +1133,22 @@ export default function ChatPage() {
                     {item.role === "assistant" && <div className="chat-turn-avatar">PL</div>}
 
                     <div className={`chat-bubble chat-bubble-${item.role}`}>
-                      <p className="chat-bubble-content">{item.content}</p>
+                      {item.kind === "story-audio" && item.audioUrl ? (
+                        <div className="chat-story-generated-wrap">
+                          <StoryModeCharacter className="chat-story-3d-character" subtitle="Generated narration ready" />
+
+                          <div className="chat-story-audio-wrapper">
+                            <div className="chat-story-generated-badge">Generated Story</div>
+                            <p className="chat-bubble-content">{item.content}</p>
+                            <audio className="chat-story-audio-player" controls preload="metadata" src={item.audioUrl} />
+                            <a className="chat-story-audio-download" href={item.audioUrl} download={item.audioFileName || "story.mp3"}>
+                              Download MP3
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="chat-bubble-content">{item.content}</p>
+                      )}
                       <span className="chat-bubble-time">{formatMessageTime(item.createdAt)}</span>
                     </div>
                   </div>
@@ -1056,11 +1157,24 @@ export default function ChatPage() {
                 {isSendingChat && (
                   <div className="chat-turn chat-turn-assistant">
                     <div className="chat-turn-avatar">PL</div>
-                    <div className="chat-bubble chat-bubble-assistant chat-bubble-thinking">
-                      <span className="chat-typing-dot" />
-                      <span className="chat-typing-dot" />
-                      <span className="chat-typing-dot" />
-                    </div>
+
+                    {selectedMode === "silver" ? (
+                      <div className="chat-bubble chat-bubble-assistant chat-story-generating-bubble">
+                        <StoryModeCharacter className="chat-story-3d-character chat-story-3d-character-compact" subtitle="Composing your audio..." />
+
+                        <div className="chat-story-generating-content">
+                          <p className="chat-story-generating-title">Generating story narration</p>
+                          <p className="chat-story-generating-copy">We are crafting your Story Mode audio now.</p>
+                          <GeneratingLoader className="chat-story-generating-loader" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="chat-bubble chat-bubble-assistant chat-bubble-thinking">
+                        <span className="chat-typing-dot" />
+                        <span className="chat-typing-dot" />
+                        <span className="chat-typing-dot" />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
