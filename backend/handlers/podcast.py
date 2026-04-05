@@ -58,8 +58,9 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
     systems = SYSTEMS.get(level, SYSTEMS["friend"])
     discussion_instruction = (
         "The podcast must be a normal discussion about the topic, not related to YouTube videos, uploads, or any video content. "
-        "The host's responses should make up approximately 40% of the total conversation length, and the guest's responses should make up approximately 60%. "
-        "The total conversation must not exceed 8000 characters."
+        "Each speaker must not speak more than 2 sentences per turn. "
+        "The total conversation must not exceed 8000 characters. "
+        "Use the correct voice for each speaker as defined."
     )
     messages = [
         {"role": "system", "content": systems[0] + " " + discussion_instruction},
@@ -120,14 +121,18 @@ def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str) -> str
         return f"Error generating speech: {str(e)}"
 
 def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str) -> str:
+    # Defensive: always resolve speakers and voices by value, not by index
+    speakers = SPEAKER_NAMES.get(level, SPEAKER_NAMES["friend"])
     voice_ids = VOICE_IDS_PAIR.get(level, VOICE_IDS_PAIR["friend"])
     temp_files = []
     for idx, turn in enumerate(dialogue_dict["dialogue"]):
         speaker, text = list(turn.items())[0]
-        if speaker == SPEAKER_NAMES[level][0]:
+        if speaker == speakers[0]:
             voice_id = voice_ids[0]
-        else:
+        elif speaker == speakers[1]:
             voice_id = voice_ids[1]
+        else:
+            voice_id = voice_ids[idx % 2]
         temp_mp3 = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         text_to_speech_elevenlabs(text, temp_mp3.name, voice_id)
         temp_files.append(temp_mp3.name)
