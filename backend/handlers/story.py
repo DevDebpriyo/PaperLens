@@ -52,6 +52,7 @@ def generate_story_from_text(extracted_text: str, level: str = "beginner") -> st
             ],
             model="llama-3.1-8b-instant",
             temperature=0.7
+            # No temp file removal needed for story handler as per new requirements
         )
         story = chat_completion.choices[0].message.content.strip()
         return story

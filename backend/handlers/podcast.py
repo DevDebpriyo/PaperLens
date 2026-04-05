@@ -8,6 +8,8 @@ import shutil
 
 load_dotenv()
 
+ELEVEN_LABS_API_KEY = os.getenv("ELEVEN_LABS_API_KEY")
+
 def get_groq_client():
     with open("tokens.json", "r") as f:
         keys = list(json.load(f).values())
@@ -94,10 +96,10 @@ def ai_podcast_conversation(paper_text: str, turns: int = 6, max_chars: int = 50
                 break
     return {"dialogue": dialogue}
 
-def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str, api_key: str) -> str:
+def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str) -> str:
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     headers = {
-        "xi-api-key": api_key,
+        "xi-api-key": ELEVEN_LABS_API_KEY,
         "Content-Type": "application/json"
     }
     payload = {
@@ -133,6 +135,5 @@ def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str, eleven
         for fname in temp_files:
             with open(fname, "rb") as infile:
                 shutil.copyfileobj(infile, outfile)
-    for fname in temp_files:
-        os.remove(fname)
+    # No need to remove temp files as per new requirements
     return output_path
