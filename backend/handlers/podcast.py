@@ -119,7 +119,7 @@ def text_to_speech_elevenlabs(text: str, output_path: str, voice_id: str) -> str
     except Exception as e:
         return f"Error generating speech: {str(e)}"
 
-def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str, elevenlabs_api_key: str) -> str:
+def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str) -> str:
     voice_ids = VOICE_IDS_PAIR.get(level, VOICE_IDS_PAIR["friend"])
     temp_files = []
     for idx, turn in enumerate(dialogue_dict["dialogue"]):
@@ -129,7 +129,7 @@ def multi_podcast_labs(dialogue_dict: dict, level: str, output_path: str, eleven
         else:
             voice_id = voice_ids[1]
         temp_mp3 = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        text_to_speech_elevenlabs(text, temp_mp3.name, voice_id, elevenlabs_api_key)
+        text_to_speech_elevenlabs(text, temp_mp3.name, voice_id)
         temp_files.append(temp_mp3.name)
     with open(output_path, "wb") as outfile:
         for fname in temp_files:
