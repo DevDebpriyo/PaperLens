@@ -4,7 +4,9 @@ from pydantic import BaseModel
 import tempfile
 import os
 import time
-from handlers import generate_story_from_text, text_to_speech_elevenlabs
+import asyncio
+from handlers import generate_story_from_text, text_to_speech_elevenlabs, extract_pdf_text
+from handlers.pdf import validate_pdf
 
 router = APIRouter()
 
@@ -45,6 +47,16 @@ async def upload_file(file: UploadFile = File(...)):
 @router.post("/user/prompt")
 async def submit_prompt(request: PromptRequest, background_tasks: BackgroundTasks):
     try:
+        # Validate if the prompt is research paper related
+        validation_result = await validate_pdf(request.prompt)
+        
+        if validation_result != "YES":
+            return {
+                "text": "",
+                "message": "Prompt validation failed. Please provide a research paper-related prompt.",
+                "validation": validation_result
+            }, 400
+
         story = generate_story_from_text(request.prompt, level="beginner")
 
         temp_dir = tempfile.gettempdir()
