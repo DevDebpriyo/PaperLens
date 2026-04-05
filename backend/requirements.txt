@@ -5,4 +5,4 @@ python-dotenv
 groq
 pymupdf
 ujson
-asynpg
+asyncpg
