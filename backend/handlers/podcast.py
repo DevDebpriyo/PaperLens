@@ -9,8 +9,7 @@ import shutil
 load_dotenv()
 
 def get_groq_client():
-    tokens_path = os.path.join(os.path.dirname(__file__), "..", "data", "tokens.json")
-    with open(tokens_path, "r") as f:
+    with open("tokens.json", "r") as f:
         keys = list(json.load(f).values())
     last_exception = None
     for key in keys:
