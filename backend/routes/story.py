@@ -4,6 +4,10 @@ from pydantic import BaseModel
 import tempfile
 import os
 from handlers import generate_story_from_text, text_to_speech_elevenlabs
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 router = APIRouter()
 
